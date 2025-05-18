@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="create-background">
+  <!-- CreateForm 컴포넌트 포함 -->
+  {% include 'components/create_form.html' %}
+  
+  <!-- 로그아웃 버튼 -->
+  <button class="logout-button" onclick="handleLogOut()">로그아웃</button>
+  
+  <!-- PlayListMember 컴포넌트 포함 -->
+  {% include 'components/play_list_member.html' %}
+</div>
+{% endblock %}

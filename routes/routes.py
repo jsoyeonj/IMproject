@@ -29,3 +29,13 @@ def create_end():
 @routes.route('/<path:path>')
 def catch_all(path):
     return render_template('home.html')
+
+
+@routes.route('/createMember')
+def create_member():
+    # 로그인 상태 확인
+    if 'user_id' not in session:
+        # 로그인되지 않은 경우 홈페이지로 리디렉션
+        return redirect(url_for('routes.home'))
+
+    return render_template('create_member.html')

@@ -54,3 +54,12 @@ def check_member():
 
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
+
+
+@auth.route('/auth/logout', methods=['POST'])
+def logout():
+    # 세션에서 사용자 정보 제거
+    session.pop('user_id', None)
+    session.pop('is_member', None)
+
+    return jsonify({'success': True})
