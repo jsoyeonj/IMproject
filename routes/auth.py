@@ -4,7 +4,7 @@ import requests
 import json
 import os
 
-# 구글 OAuth 설정 good good
+# 구글 OAuth 설정
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
 GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
@@ -37,7 +37,7 @@ def callback():
     # 이 부분은 실제 구현시 더 복잡합니다
 
     # 사용자 정보 검색 로직
-    # ...
+
 
     # 로그인 성공시 홈페이지로 리디렉트
     return redirect(url_for("routes.home"))
