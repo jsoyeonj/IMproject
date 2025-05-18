@@ -1,6 +1,6 @@
 // static/js/main.js
 
-// ProcessButton 클릭 시 해당 경로로 이동하는 함수
+// ProcessButton 클릭 시 해당 경로로 이동하는 함수..
 function handleProcessButton(route) {
   window.location.href = '/' + route;
 }
