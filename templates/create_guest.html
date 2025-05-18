@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="create-background">
+  <!-- CreateForm 컴포넌트 포함 -->
+  {% include 'components/create_form.html' %}
+  
+  <!-- PlayListDetailGuest 컴포넌트 포함 -->
+  {% include 'components/play_list_detail_guest.html' %}
+</div>
+{% endblock %}

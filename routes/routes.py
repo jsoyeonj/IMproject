@@ -39,3 +39,6 @@ def create_member():
         return redirect(url_for('routes.home'))
 
     return render_template('create_member.html')
+@routes.route('/createGuest')
+def create_guest():
+    return render_template('create_guest.html')
