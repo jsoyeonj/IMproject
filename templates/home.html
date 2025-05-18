@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="home-background">
+  <div class="home-container">
+    <h1 class="home-title">Croffle</h1>
+    <h2 class="home-subtitle">하나뿐인 작업곡을 만들어보세요</h2>
+    
+    <!-- ProcessButton 컴포넌트 포함 -->
+    {% if is_member %}
+      {% include 'components/process_button.html' with context %}
+    {% else %}
+      {% include 'components/process_button.html' with context %}
+      {% include 'components/google_login_button.html' %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script>
+        // 서버에서 제공한 테마 설정을 전역 변수로 설정
+        window.appTheme = {{ theme|safe }};
+    </script>
+</head>
+<body>
+    <div id="root">
+        <!-- 여기에 콘텐츠가 로드됩니다 (React의 Outlet 역할) -->
+        {% block content %}
+        <div>Loading...</div>
+        {% endblock %}
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
