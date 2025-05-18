@@ -1,0 +1,68 @@
+<div class="create-form-container">
+  <div class="create-form-header" onclick="handleHome()">
+    <p>Croffle</p>
+  </div>
+
+  <div class="create-form-main">
+    <div class="sample-controller">
+      <p class="form-title">
+        음악
+        <br /> 생성하기
+        <span class="form-subtitle">Music Generation</span>
+        <button class="create-mode-controll-button" onclick="handleCreateMode()">
+          <span id="mode-text">직접 선택해 음악 생성하기</span>
+        </button>
+      </p>
+
+      <!-- PlayTab 컴포넌트 포함 -->
+      {% include 'components/play_tab.html' %}
+    </div>
+
+    <!-- 조건부 렌더링을 위한 컨테이너 -->
+    <div id="create-mode-container">
+      <!-- 기본적으로 CreateController를 표시 -->
+      {% include 'components/create_controller.html' %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // 이미지 모드인지 여부를 추적하는 변수
+  let isImageMode = false;
+
+  // 생성 모드 전환 함수
+  function handleCreateMode() {
+    isImageMode = !isImageMode;
+
+    // 모드 텍스트 업데이트
+    const modeText = document.getElementById('mode-text');
+    if (modeText) {
+      modeText.textContent = isImageMode ? '직접 선택해 음악 생성하기' : '이미지로 음악 생성하기';
+    }
+
+    // 컨테이너 내용 업데이트
+    const container = document.getElementById('create-mode-container');
+    if (container) {
+      if (isImageMode) {
+        // CreateImage 컴포넌트 로드
+        fetch('/components/create_image')
+          .then(response => response.text())
+          .then(html => {
+            container.innerHTML = html;
+          });
+      } else {
+        // CreateController 컴포넌트 로드
+        fetch('/components/create_controller')
+          .then(response => response.text())
+          .then(html => {
+            container.innerHTML = html;
+          });
+      }
+    }
+  }
+
+  // 홈으로 이동 함수
+  function handleHome() {
+    window.location.href = '/';
+  }
+</script>

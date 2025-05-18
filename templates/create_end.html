@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="create-header" onclick="onHome()">
+  <p>Croffle</p>
+</div>
+
+<div class="create-end-background">
+  <div class="create-end-container">
+    <!-- PlayTab 컴포넌트 포함 -->
+    {% include 'components/play_tab.html' %}
+    
+    <p class="script">음악이 완성되었어요!</p>
+    <p class="script">한번 들어볼까요?</p>
+    
+    <div class="move-button-container">
+      <div class="move-playlist-button" onclick="onMovePlayList()">
+        또 만들고 싶어요
+      </div>
+      <div class="move-playlist-like-button" onclick="onMovePlayListLike()">
+        다른 사람이 만든 음악도 들어볼래요
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 페이지 로드 시 저장된 음악 URL 가져오기
+  document.addEventListener('DOMContentLoaded', function() {
+    const savedUrl = findUrl();
+    // PlayTab 컴포넌트에 URL 전달
+    const playTab = document.getElementById('play-tab');
+    if (playTab) {
+      playTab.setAttribute('data-music-url', savedUrl);
+    }
+  });
+  
+  // localStorage에서 현재 음악 URL 찾기
+  function findUrl() {
+    if (localStorage.getItem('currentMusicUrl')) {
+      console.log(localStorage.getItem('currentMusicUrl'));
+      return localStorage.getItem('currentMusicUrl');
+    } else {
+      return '';
+    }
+  }
+  
+  // 이전 페이지로 이동
+  function onMovePlayList() {
+    window.history.back();
+  }
+  
+  // 좋아요 페이지로 이동
+  function onMovePlayListLike() {
+    window.location.href = '/createLike';
+  }
+  
+  // 홈으로 이동
+  function onHome() {
+    window.location.href = '/';
+  }
+</script>
+{% endblock %}

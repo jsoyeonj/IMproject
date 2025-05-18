@@ -1,0 +1,26 @@
+<div id="play-tab" class="play-tab" data-music-url="">
+  <audio id="audio-player" controls>
+    <source id="audio-source" src="" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+</div>
+
+<script>
+  // 페이지 로드 시 실행
+  document.addEventListener('DOMContentLoaded', function() {
+    const playTab = document.getElementById('play-tab');
+    if (playTab) {
+      const musicUrl = playTab.getAttribute('data-music-url');
+      if (musicUrl) {
+        const audioSource = document.getElementById('audio-source');
+        if (audioSource) {
+          audioSource.src = musicUrl;
+        }
+        const audioPlayer = document.getElementById('audio-player');
+        if (audioPlayer) {
+          audioPlayer.load(); // 오디오 소스가 변경되었으므로 다시 로드
+        }
+      }
+    }
+  });
+</script>

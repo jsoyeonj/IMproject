@@ -1,6 +1,7 @@
 from flask import Flask, render_template, g
 from routes.routes import routes
 from routes.auth import auth
+from routes.api import api
 import json
 
 app = Flask(__name__)
@@ -9,6 +10,7 @@ app.secret_key = "your_secret_key"  # 세션을 위한 시크릿 키 설정
 # 블루프린트 등록
 app.register_blueprint(routes)
 app.register_blueprint(auth)
+app.register_blueprint(api)
 
 # 앱 설정 및 초기화
 @app.before_request

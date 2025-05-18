@@ -1,0 +1,147 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="create-background">
+  <div class="create-form-header" onclick="handleHome()">
+    <p>Croffle</p>
+  </div>
+  
+  <div class="playlist-container">
+    <div class="column-box">
+      <div class="playlist-title">실시간 생성 중!</div>
+      <div class="playlist-wrapper">
+        <div class="playlist">
+          실시간 생성중!
+          {% if play_list %}
+            {% for music in play_list %}
+              <div class="musicContainer2">
+                <img class="music-img" src="{{ url_for('static', filename='img/musicImg.svg') }}" alt="Music">
+                <div class="music-title">{{ music.title }}</div>
+                <div class="music-like">
+                  <button onclick="handleMusicLike({{ music.music_id }})">
+                    {% if music.pressed %}
+                      <img src="{{ url_for('static', filename='img/LikeAfter.svg') }}" alt="Like button">
+                    {% else %}
+                      <img src="{{ url_for('static', filename='img/LikeBefore.svg') }}" alt="Like button">
+                    {% endif %}
+                  </button>
+                  <p>{{ music.like }}</p>
+                </div>
+                <div class="music-play-button">
+                  <button onclick="handlePlayButton({{ music.music_id }}, '{{ music.audio_url }}', '{{ music.title }}')">
+                    <img id="play-button-{{ music.music_id }}" src="{{ url_for('static', filename='img/stopButton.svg') }}" alt="Play/Stop button">
+                  </button>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+    <div class="column-box">
+      <div class="playlist-title">이번주 인기음악</div>
+      <div class="playlist-wrapper">
+        <div class="popular-playlist">
+          {% if popular_play_list %}
+            {% for music in popular_play_list %}
+              <div class="musicContainer2">
+                <img class="music-img" src="{{ url_for('static', filename='img/musicImg.svg') }}" alt="Music">
+                <div class="music-title">{{ music.title }}</div>
+                <div class="music-like">
+                  <button onclick="handleMusicLike({{ music.music_id }})">
+                    {% if music.pressed %}
+                      <img src="{{ url_for('static', filename='img/LikeAfter.svg') }}" alt="Like button">
+                    {% else %}
+                      <img src="{{ url_for('static', filename='img/LikeBefore.svg') }}" alt="Like button">
+                    {% endif %}
+                  </button>
+                  <p>{{ music.like }}</p>
+                </div>
+                <div class="music-play-button">
+                  <button onclick="handlePlayButton({{ music.music_id }}, '{{ music.audio_url }}', '{{ music.title }}')">
+                    <img id="play-button-{{ music.music_id }}" src="{{ url_for('static', filename='img/stopButton.svg') }}" alt="Play/Stop button">
+                  </button>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 오디오 플레이어 (숨겨진 상태) -->
+  <audio id="audio-player" style="display: none;"></audio>
+</div>
+
+<script>
+  // 전역 변수 설정
+  let currentMusicId = null;
+  let isPlaying = false;
+  
+  // 홈 페이지로 이동
+  function handleHome() {
+    window.location.href = '/';
+  }
+  
+  // 음악 좋아요 처리
+  function handleMusicLike(musicId) {
+    fetch('/api/like-music', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ music_id: musicId }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // 좋아요 상태 업데이트를 위해 페이지 새로고침
+        window.location.reload();
+      } else if (data.error === 'login_required') {
+        alert('로그인이 필요한 서비스입니다.');
+      } else {
+        console.error('좋아요 처리 오류:', data.error);
+      }
+    })
+    .catch(error => {
+      console.error('좋아요 요청 오류:', error);
+    });
+  }
+  
+  // 음악 재생/정지 처리
+  function handlePlayButton(musicId, audioUrl, title) {
+    const audioPlayer = document.getElementById('audio-player');
+    const playButton = document.getElementById(`play-button-${musicId}`);
+    
+    if (currentMusicId === musicId && isPlaying) {
+      // 현재 재생 중인 음악 정지
+      audioPlayer.pause();
+      isPlaying = false;
+      playButton.src = "{{ url_for('static', filename='img/stopButton.svg') }}";
+    } else {
+      // 다른 음악 재생 버튼 초기화
+      if (currentMusicId) {
+        const currentButton = document.getElementById(`play-button-${currentMusicId}`);
+        if (currentButton) {
+          currentButton.src = "{{ url_for('static', filename='img/stopButton.svg') }}";
+        }
+      }
+      
+      // 새 음악 재생
+      audioPlayer.src = audioUrl;
+      audioPlayer.play();
+      currentMusicId = musicId;
+      isPlaying = true;
+      playButton.src = "{{ url_for('static', filename='img/playButton.svg') }}";
+      
+      // 재생 종료 시 상태 업데이트
+      audioPlayer.onended = function() {
+        isPlaying = false;
+        playButton.src = "{{ url_for('static', filename='img/stopButton.svg') }}";
+      };
+    }
+  }
+</script>
+{% endblock %}
