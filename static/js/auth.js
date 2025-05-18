@@ -26,3 +26,4 @@ function handleLogOut() {
     console.error('로그아웃 요청 오류:', error);
   });
 }
+good
