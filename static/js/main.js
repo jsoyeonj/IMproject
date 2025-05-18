@@ -5,7 +5,7 @@ function handleProcessButton(route) {
   window.location.href = '/' + route;
 }
 
-// ProcessButton 클릭 이벤트 처리
+// ProcessButton 클릭 이벤트 처리(확인용)
 function onClickProcess(route) {
   console.log("Process button clicked: " + route);
   window.location.href = "/" + route;
