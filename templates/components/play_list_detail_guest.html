@@ -1,0 +1,220 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="play-list-detail-container">
+  <div class="play-list-container">
+    {% if error %}
+      <div class="error-message">{{ error }}</div>
+    {% endif %}
+
+    {% for music in music_list %}
+      <div class="musicContainer" data-music-id="{{ music.musicId }}" data-music-url="{{ music.musicUrl }}">
+        <div class="audio-element">
+          <img class="music-img" src="{{ url_for('static', filename='img/musicImg.svg') }}" alt="Music">
+          <div class="music-title">{{ music.title }}</div>
+          <div class="music-play-button">
+            <button class="play-stop-button" data-music-id="{{ music.musicId }}">
+              <img src="{{ url_for('static', filename='img/stopButton.svg') }}" alt="Play/Stop" class="play-icon">
+            </button>
+          </div>
+        </div>
+        <div class="progress-element">
+          <div class="progress-bar-container">
+            <div class="progress" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  // 음악 재생 관련 JavaScript
+  document.addEventListener('DOMContentLoaded', function() {
+    let currentAudio = null;
+    let currentMusicId = null;
+    let isPlaying = false;
+
+    // 모든 재생 버튼에 이벤트 리스너 추가
+    const playButtons = document.querySelectorAll('.play-stop-button');
+    playButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const musicId = this.getAttribute('data-music-id');
+        const musicContainer = document.querySelector(`.musicContainer[data-music-id="${musicId}"]`);
+        const musicUrl = musicContainer.getAttribute('data-music-url');
+        const progressBar = musicContainer.querySelector('.progress');
+
+        // 현재 재생 중인 음악이 클릭한 음악과 같은 경우
+        if (currentMusicId === musicId && isPlaying) {
+          stopMusic();
+        } else {
+          // 다른 음악이 재생 중이면 중지
+          if (currentAudio) {
+            stopMusic();
+          }
+
+          // 새 음악 재생
+          playMusic(musicId, musicUrl, progressBar);
+        }
+      });
+    });
+
+    // 음악 재생 함수
+    function playMusic(musicId, musicUrl, progressBar) {
+      currentAudio = new Audio(musicUrl);
+      currentMusicId = musicId;
+
+      // 아이콘 변경
+      const button = document.querySelector(`.play-stop-button[data-music-id="${musicId}"]`);
+      button.querySelector('img').src = "{{ url_for('static', filename='img/playButton.svg') }}";
+
+      // 음악 재생
+      currentAudio.play();
+      isPlaying = true;
+
+      // 진행률 업데이트
+      currentAudio.addEventListener('timeupdate', function() {
+        const progress = (currentAudio.currentTime / currentAudio.duration) * 100;
+        progressBar.style.width = `${progress}%`;
+      });
+
+      // 음악 종료 시 처리
+      currentAudio.addEventListener('ended', function() {
+        stopMusic();
+      });
+    }
+
+    // 음악 중지 함수
+    function stopMusic() {
+      if (currentAudio) {
+        currentAudio.pause();
+
+        // 아이콘 변경
+        const button = document.querySelector(`.play-stop-button[data-music-id="${currentMusicId}"]`);
+        button.querySelector('img').src = "{{ url_for('static', filename='img/stopButton.svg') }}";
+
+        isPlaying = false;
+      }
+    }
+
+    // 페이지 이동 시 음악 중지
+    window.addEventListener('beforeunload', function() {
+      if (currentAudio) {
+        currentAudio.pause();
+      }
+    });
+  });
+</script>
+
+<style>
+  /* 원래 styled-components 스타일들을 CSS로 변환 */
+  .play-list-detail-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+  }
+
+  .play-list-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20rem;
+  }
+
+  .music-img {
+    width: 4rem;
+    height: 4rem;
+    margin-left: 0.5rem;
+  }
+
+  .music-title {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 14rem;
+    height: 5rem;
+    margin-left: 1rem;
+    font-size: 1.2rem;
+  }
+
+  .music-play-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 5rem;
+    height: 5rem;
+    position: relative;
+  }
+
+  .music-play-button img {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .audio-element {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .progress-element {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .progress-bar-container {
+    display: flex;
+    width: 100%;
+    height: 0.5rem;
+    background-color: #d8d8d8;
+    border-radius: 0.5rem;
+  }
+
+  .progress {
+    width: 0%;
+    height: 100%;
+    background-color: #3d1655;
+    border-radius: 0.5rem;
+    transition: width 0.1s;
+  }
+
+  .musicContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0.25rem;
+    margin: 0.5rem;
+    width: 25rem;
+    height: 5rem;
+    border-radius: 1rem;
+    background: #e3e5ff;
+    box-shadow:
+      0px 3px 5px 0px rgba(0, 0, 0, 0.25) inset,
+      0px 4px 5px 3px rgba(134, 126, 126, 0.25);
+    opacity: 0.8;
+    transform: scale(0.8);
+    animation: fadeIn 0.3s forwards;
+  }
+
+  @keyframes fadeIn {
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .error-message {
+    color: red;
+    font-size: 1.2rem;
+    margin: 2rem 0;
+  }
+</style>
+{% endblock %}

@@ -1,6 +1,7 @@
-<div id="play-tab" class="play-tab" data-music-url="">
+{% macro play_tab(music_url='') %}
+<div id="play-tab" class="play-tab" data-music-url="{{ music_url }}">
   <audio id="audio-player" controls>
-    <source id="audio-source" src="" type="audio/mpeg">
+    <source id="audio-source" src="{{ music_url }}" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
 </div>
@@ -24,3 +25,26 @@
     }
   });
 </script>
+
+<style>
+  .play-tab {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 1rem 0;
+  }
+
+  #audio-player {
+    width: 300px;
+  }
+</style>
+{% endmacro %}
+
+{# 이 파일이 직접 호출된 경우 기본 템플릿으로 렌더링 #}
+{% if not call_macro %}
+{% extends "layout.html" %}
+{% block content %}
+  {{ play_tab(music_url) }}
+{% endblock %}
+{% endif %}

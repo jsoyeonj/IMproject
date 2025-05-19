@@ -2,6 +2,11 @@ from flask import Flask, render_template, g
 from routes.routes import routes
 from routes.auth import auth
 from routes.api import api
+from routes.playlist_guest import playlist_guest_bp
+from routes.playlist_detail_member import playlist_detail_member_bp
+from routes.playlist_detail_guest import playlist_detail_guest_bp
+from routes.play_tab import play_tab_bp
+from routes.create_controller import create_controller_bp
 import json
 
 app = Flask(__name__)
@@ -11,6 +16,11 @@ app.secret_key = "your_secret_key"  # 세션을 위한 시크릿 키 설정
 app.register_blueprint(routes)
 app.register_blueprint(auth)
 app.register_blueprint(api)
+app.register_blueprint(playlist_guest_bp)
+app.register_blueprint(playlist_detail_member_bp)
+app.register_blueprint(playlist_detail_guest_bp)
+app.register_blueprint(play_tab_bp)
+app.register_blueprint(create_controller_bp)
 
 # 앱 설정 및 초기화
 @app.before_request
