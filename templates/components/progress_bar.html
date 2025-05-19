@@ -1,0 +1,23 @@
+<div class="progress-bar-container">
+  <div class="progress" id="progress-bar" style="width: 0%;"></div>
+</div>
+
+<script>
+  // 프로그레스 바 업데이트 함수
+  function updateProgressBar(progress) {
+    const progressBar = document.getElementById('progress-bar');
+    if (progressBar) {
+      progressBar.style.width = `${progress}%`;
+    }
+  }
+
+  // 페이지 로드 시 초기 진행도 설정
+  document.addEventListener('DOMContentLoaded', function() {
+    // progress 값이 설정되어 있으면 해당 값으로 초기화
+    const progressBarContainer = document.querySelector('.progress-bar-container');
+    if (progressBarContainer) {
+      const progress = progressBarContainer.getAttribute('data-progress') || 0;
+      updateProgressBar(Number(progress));
+    }
+  });
+</script>

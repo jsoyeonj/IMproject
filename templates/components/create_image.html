@@ -1,0 +1,76 @@
+<div class="create-image-container">
+  <input type="file" id="create-image-input" class="create-image-input" accept="image/*">
+
+  <img id="preview-image" src="{{ url_for('static', filename='img/imageUpload.svg') }}" alt="Upload Image" class="create-input-image" onclick="addImage()">
+
+  <button class="create-image-button" onclick="submitImage()">
+    사진으로 음악 생성하기
+  </button>
+</div>
+
+<!-- 로딩 컴포넌트 (기본적으로 숨겨져 있음) -->
+<div id="loading-component" class="loading-container" style="display: none;">
+  {% include 'components/loading.html' %}
+</div>
+
+<script>
+  // 이미지 업로드를 위한 입력 필드 클릭
+  function addImage() {
+    document.getElementById('create-image-input').click();
+  }
+
+  // 이미지 선택 시 미리보기 설정
+  document.getElementById('create-image-input').addEventListener('change', function(event) {
+    const imageFile = event.target.files[0];
+    if (imageFile) {
+      const reader = new FileReader();
+      reader.onloadend = function() {
+        const previewImage = document.getElementById('preview-image');
+        previewImage.src = reader.result;
+        alert('사진이 성공적으로 업로드되었습니다!');
+      };
+      reader.readAsDataURL(imageFile);
+    }
+  });
+
+  // 이미지 제출 및 음악 생성
+  function submitImage() {
+    // 이미지가 선택되었는지 확인
+    const imageInput = document.getElementById('create-image-input');
+    if (!imageInput.files || imageInput.files.length === 0) {
+      alert('이미지를 선택해주세요.');
+      return;
+    }
+
+    // 로딩 컴포넌트 표시
+    document.getElementById('loading-component').style.display = 'flex';
+
+    // FormData 생성
+    const formData = new FormData();
+    formData.append('image', imageInput.files[0]);
+
+    // 서버에 이미지 업로드 요청
+    fetch('/api/generate-music-from-image', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      // 로딩 컴포넌트 숨김
+      document.getElementById('loading-component').style.display = 'none';
+
+      if (data.success) {
+        // 성공 시 음악 URL 저장 및 완료 페이지로 이동
+        localStorage.setItem('currentMusicUrl', data.musicUrl);
+        window.location.href = '/createEnd';
+      } else {
+        alert('음악 생성에 실패했습니다: ' + data.error);
+      }
+    })
+    .catch(error => {
+      // 로딩 컴포넌트 숨김
+      document.getElementById('loading-component').style.display = 'none';
+      alert('요청 중 오류가 발생했습니다: ' + error);
+    });
+  }
+</script>
