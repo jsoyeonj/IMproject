@@ -9,7 +9,7 @@ def playlist_detail_guest():
     try:
         # API에서 공개 음악 목록 가져오기 (백엔드 API가 있다고 가정)
         # 백엔드한테 주소 받고 여기 주소를 실제 API URL로 변경
-        response = requests.get('http://your-api-url/api/playlist')
+        response = requests.get('http://127.0.0.1:5000')
 
         if response.status_code == 200:
             music_list = response.json()

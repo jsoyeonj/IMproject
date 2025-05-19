@@ -62,7 +62,7 @@ def generate_music():
 
     try:
         # 백엔드 친구들한테 받으면 실제 API URL로 변경하기
-        api_url = "http://your-api-url/api/generate-music"
+        api_url = "http://127.0.0.1:5000"
 
         # API 요청 데이터
         data = {
