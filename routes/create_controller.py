@@ -61,7 +61,7 @@ def generate_music():
     is_member = 'access_token' in session
 
     try:
-        # API URL 설정 (실제 API URL로 변경 필요)
+        # 백엔드 친구들한테 받으면 실제 API URL로 변경하기
         api_url = "http://your-api-url/api/generate-music"
 
         # API 요청 데이터
