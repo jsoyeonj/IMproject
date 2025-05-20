@@ -1,0 +1,71 @@
+# Python 관련
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Flask 관련
+instance/
+.webassets-cache
+
+# 환경 변수 및 비밀 정보
+.env
+.flaskenv
+*.env
+
+# 로그 파일
+logs/
+*.log
+
+# 데이터베이스
+*.db
+*.sqlite
+*.sqlite3
+
+# 정적 파일 컴파일 결과 (선택적)
+static/.webassets-cache
+static/gen/
+
+# 에디터 및 IDE 관련
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 프론트엔드 빌드 관련 (혼합 프로젝트의 경우)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock

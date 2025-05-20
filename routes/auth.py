@@ -3,8 +3,8 @@ from oauthlib.oauth2 import WebApplicationClient
 import requests
 import json
 import os
-pythonfrom flask import jsonify
-from models.auth import create_google_login_response, create_login_error_response
+from flask import jsonify
+#from models.auth import create_google_login_response, create_login_error_response
 
 # 구글 OAuth 설정
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
