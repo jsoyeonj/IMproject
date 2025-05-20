@@ -15,22 +15,12 @@ import json
 from config import get_config
 from dotenv import load_dotenv  # 이 줄 추가
 import os  # 이 줄도 추가
-# .env 파일 로드
-load_dotenv()
-# 개발 환경에서 HTTPS 요구 사항 비활성화
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
-from dotenv import load_dotenv
-import os
 
 # .env 파일 로드
 load_dotenv()
 
 # 개발 환경에서 HTTPS 요구 사항 비활성화 (OAuth2를 위해)
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-
-# 환경 변수에서 시크릿 키 가져오기
-app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
 def create_app(config_class=None):
     """애플리케이션 팩토리 함수"""
