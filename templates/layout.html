@@ -18,6 +18,13 @@
     <div id="root" class="layout-box">
         {% block content %}{% endblock %}
     </div>
+     <script>
+        // 버튼 클릭 함수 정의 (main.js에 있더라도 여기에 다시 정의)
+        function handleProcessButton(route) {
+            console.log("이동 경로: " + route);
+            window.location.href = '/' + route;
+        }
+    </script>
 
     <!-- 기본 스크립트 -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>

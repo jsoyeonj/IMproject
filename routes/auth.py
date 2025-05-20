@@ -12,6 +12,7 @@ load_dotenv()
 
 # 개발 환경에서 HTTPS 요구 사항 비활성화
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
 # 구글 OAuth 설정
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)

@@ -1,4 +1,4 @@
-function handleGoogleLogin() {
+/*function handleGoogleLogin() {
   // Google 로그인 구현
   console.log("Google login initiated");
 
@@ -26,4 +26,11 @@ function handleLogOut() {
     console.error('로그아웃 요청 오류:', error);
   });
 }
-good
+*/
+function handleGoogleLogin() {
+  console.log("Google login initiated");
+}
+
+function handleLogOut() {
+  console.log("로그아웃 함수 실행");
+}

@@ -25,12 +25,14 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 def create_app(config_class=None):
     """애플리케이션 팩토리 함수"""
     app = Flask(__name__)
-
+    app.secret_key = os.getenv("FLASK_SECRET_KEY", "your_fallback_secret_key")  # 기본값 추가
     # 설정 로드
     if config_class is None:
         config_class = get_config()
     app.config.from_object(config_class)
-    app.secret_key = os.getenv("FLASK_SECRET_KEY", "your_fallback_secret_key")  # 기본값 추가
+
+
+
     # 블루프린트 등록
     app.register_blueprint(routes)
     app.register_blueprint(auth)

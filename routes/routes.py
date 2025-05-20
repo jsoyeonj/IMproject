@@ -11,6 +11,8 @@ def home():
 
 @routes.route('/createGuest')
 def create_guest():
+    # 세션에 게스트 상태 저장 (추가)
+    session['is_member'] = False
     return render_template('create_guest.html')
 
 @routes.route('/createMember')
@@ -19,7 +21,8 @@ def create_member():
     if 'user_id' not in session:
         # 로그인되지 않은 경우 홈페이지로 리디렉션
         return redirect(url_for('routes.home'))
-
+    # 세션에 회원 상태 저장 (추가)
+    session['is_member'] = True
     return render_template('create_member.html')
 
 @routes.route('/createLike')
