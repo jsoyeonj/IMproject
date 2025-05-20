@@ -3,6 +3,8 @@ from oauthlib.oauth2 import WebApplicationClient
 import requests
 import json
 import os
+pythonfrom flask import jsonify
+from models.auth import create_google_login_response, create_login_error_response
 
 # 구글 OAuth 설정
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
@@ -63,3 +65,22 @@ def logout():
     session.pop('is_member', None)
 
     return jsonify({'success': True})
+
+
+@auth.route("/api/auth/google/callback", methods=["POST"])
+def google_callback_api():
+    try:
+        # 구글 로그인 처리 로직
+        # ...
+
+        # 성공적으로 처리된 경우
+        access_token = "generated_access_token"  # 실제로는 OAuth 프로세스에서 생성
+
+        # 응답 생성
+        response = create_google_login_response(access_token)
+        return jsonify(response)
+
+    except Exception as e:
+        # 오류 처리
+        response = create_login_error_response(str(e))
+        return jsonify(response), 400

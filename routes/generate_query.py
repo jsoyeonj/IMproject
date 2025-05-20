@@ -166,4 +166,21 @@ def upload_image():
         print(f"이미지 업로드 오류: {e}")
         return jsonify({
             'success': False,
-            'message': '이미지 처리 중 오류가
+            'message': '이미지 처리 중 오류가 발생했습니다.'
+        }), 500
+
+
+@generate_query_bp.route('/api/loading-status', methods=['GET'])
+def loading_status():
+    """음악 생성 작업의 로딩 상태를 확인하는 API 엔드포인트"""
+    # 실제 구현에서는 작업 ID를 통해 상태 확인
+    # 예: Celery 작업 ID 또는 데이터베이스 저장 상태
+
+    # 테스트용 임시 응답 (항상 완료됨)
+    return jsonify({
+        'success': True,
+        'response': {
+            'status': 'completed',
+            'progress': 100
+        }
+    }), 200
