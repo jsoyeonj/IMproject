@@ -5,7 +5,7 @@ api = Blueprint('api', __name__)
 
 
 @api.route('/api/like-music', methods=['POST'])
-def like_music():
+def add_like_music():  # 함수 이름을 like_music에서 add_like_music으로 변경
     # 로그인 확인
     if 'user_id' not in session:
         return jsonify({'success': False, 'error': 'login_required'})
