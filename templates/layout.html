@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
     <title>Croffle</title>
     <!-- 기본 스타일시트 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 
     <!-- 각 페이지의 블록에서 추가 CSS를 넣을 수 있도록 함 -->
     {% block styles %}{% endblock %}
+
+    <!-- 추가 head 요소를 위한 블록 -->
+    {% block head %}{% endblock %}
 </head>
 <body>
     <div id="root" class="layout-box">
