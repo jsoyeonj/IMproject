@@ -8,7 +8,7 @@ from routes.playlist_detail_guest import playlist_detail_guest_bp
 from routes.play_tab import play_tab_bp
 from routes.create_controller import create_controller_bp
 from routes.audio_query import audio_query_bp
-from routes.generate_query import generate_query_bp
+
 import json
 
 app = Flask(__name__)
@@ -24,7 +24,7 @@ app.register_blueprint(playlist_detail_guest_bp)
 app.register_blueprint(play_tab_bp)
 app.register_blueprint(create_controller_bp)
 app.register_blueprint(audio_query_bp)
-app.register_blueprint(generate_query_bp)
+
 
 # 앱 설정 및 초기화
 @app.before_request
