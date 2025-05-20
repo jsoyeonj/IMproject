@@ -13,6 +13,13 @@ from routes.create_like import create_like_bp
 from routes.audio import audio_bp
 import json
 from config import get_config
+from dotenv import load_dotenv  # 이 줄 추가
+import os  # 이 줄도 추가
+# .env 파일 로드
+load_dotenv()
+# 개발 환경에서 HTTPS 요구 사항 비활성화
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
 
 
 def create_app(config_class=None):
@@ -23,7 +30,7 @@ def create_app(config_class=None):
     if config_class is None:
         config_class = get_config()
     app.config.from_object(config_class)
-
+    app.secret_key = os.getenv("FLASK_SECRET_KEY", "your_fallback_secret_key")  # 기본값 추가
     # 블루프린트 등록
     app.register_blueprint(routes)
     app.register_blueprint(auth)
