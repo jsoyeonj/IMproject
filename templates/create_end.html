@@ -1,5 +1,95 @@
 {% extends "layout.html" %}
 
+{% block styles %}
+<style>
+  .create-header {
+    position: absolute;
+    left: 0;
+    margin: 5rem 0 0 4rem;
+    cursor: pointer;
+  }
+
+  .create-header p {
+    font-size: 2rem;
+    font-weight: 300;
+    color: #000;
+    letter-spacing: 0.125rem;
+    text-transform: capitalize;
+  }
+
+  .create-end-background {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    vertical-align: bottom;
+    background: linear-gradient(
+      119deg,
+      #fff 0%,
+      #dfd0ff 46%,
+      #faf7ff 100%,
+      #cc46b7 100%
+    );
+    background-size: cover;
+  }
+
+  .create-end-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .script {
+    font-size: 2rem;
+    font-weight: 300;
+    color: #000;
+    text-transform: capitalize;
+    margin: 1rem 0;
+  }
+
+  .move-button-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .move-playlist-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 12rem;
+    height: 2rem;
+    border: none;
+    border-radius: 1.25rem;
+    background: #fff;
+    margin-top: 1rem;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+  }
+
+  .move-playlist-like-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 16rem;
+    height: 2rem;
+    border: none;
+    border-radius: 1.25rem;
+    background: #fff;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="create-header" onclick="onHome()">
   <p>Croffle</p>
@@ -9,10 +99,10 @@
   <div class="create-end-container">
     <!-- PlayTab 컴포넌트 포함 -->
     {% include 'components/play_tab.html' %}
-    
+
     <p class="script">음악이 완성되었어요!</p>
     <p class="script">한번 들어볼까요?</p>
-    
+
     <div class="move-button-container">
       <div class="move-playlist-button" onclick="onMovePlayList()">
         또 만들고 싶어요
@@ -25,39 +115,36 @@
 </div>
 
 <script>
-  // 페이지 로드 시 저장된 음악 URL 가져오기
+  // 페이지 로드 시 Flask로부터 전달된 음악 URL 설정
   document.addEventListener('DOMContentLoaded', function() {
-    const savedUrl = findUrl();
+    // Flask 세션에서 전달된 URL 사용
+    const savedUrl = "{{ music_url|safe }}";
+
+    // 로컬 스토리지에도 저장 (클라이언트 측 호환성 유지)
+    if (savedUrl) {
+      localStorage.setItem('currentMusicUrl', savedUrl);
+    }
+
     // PlayTab 컴포넌트에 URL 전달
     const playTab = document.getElementById('play-tab');
     if (playTab) {
       playTab.setAttribute('data-music-url', savedUrl);
     }
   });
-  
-  // localStorage에서 현재 음악 URL 찾기
-  function findUrl() {
-    if (localStorage.getItem('currentMusicUrl')) {
-      console.log(localStorage.getItem('currentMusicUrl'));
-      return localStorage.getItem('currentMusicUrl');
-    } else {
-      return '';
-    }
-  }
-  
+
   // 이전 페이지로 이동
   function onMovePlayList() {
-    window.history.back();
+    window.location.href = "{{ url_for('redirect_to_controller') }}";
   }
-  
+
   // 좋아요 페이지로 이동
   function onMovePlayListLike() {
-    window.location.href = '/createLike';
+    window.location.href = "{{ url_for('create_like_bp.create_like') }}";
   }
-  
+
   // 홈으로 이동
   function onHome() {
-    window.location.href = '/';
+    window.location.href = "{{ url_for('index') }}";
   }
 </script>
 {% endblock %}

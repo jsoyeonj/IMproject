@@ -1,4 +1,4 @@
-from flask import Flask, render_template, g
+from flask import Flask, render_template, g, redirect, url_for, session
 from routes.routes import routes
 from routes.auth import auth
 from routes.api import api
@@ -15,6 +15,10 @@ import json
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # 세션을 위한 시크릿 키 설정
+
+# 세션 설정
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 세션 유효 시간 (초)
 
 # 블루프린트 등록
 app.register_blueprint(routes)
@@ -41,6 +45,19 @@ def setup_app():
             # theme.ts에서 가져온 다른 테마 설정들
         }
     }
+
+@app.route('/create/controller')
+def redirect_to_controller():
+    # create_controller 블루프린트로 리다이렉트
+    return redirect(url_for('create_controller.create_controller'))
+
+@app.route('/create-end')
+def create_end():
+    # 음악 생성 완료 페이지 렌더링
+    music_url = session.get('current_music_url', '')
+    return render_template('create_end.html',
+                          music_url=music_url,
+                          theme=json.dumps(g.theme))
 
 @app.route('/')
 def index():

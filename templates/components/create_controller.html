@@ -1,130 +1,7 @@
 {% extends "layout.html" %}
-{% block content %}
+
+{% block styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/create.css') }}">
-
-{% if error %}
-<div class="error-message">{{ error }}</div>
-{% endif %}
-
-{% if prompt_step == 1 %}
-<div class="create-controller-container">
-  <div class="Controller">
-    <p class="ControllerTitle">01</p>
-    <p class="ControllerSubtitle">스피드</p>
-    <div class="MusicSpeedInputContainer">
-      <form id="speed-form" action="{{ url_for('create_controller.next_step') }}" method="post">
-        <input class="MusicSpeedInput" name="speed" type="range" min="1" max="100" value="{{ speed }}">
-        <div class="SpeedValueContainer">
-          <p class="SpeedValue">Slow</p>
-          <p class="SpeedValue">Fast</p>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="Controller">
-    <p class="ControllerTitle">02</p>
-    <p class="ControllerSubtitle">분위기</p>
-    <div class="MusicMoodButtonContainer">
-      <button form="speed-form" type="button" value="편안한"
-              class="create-button {% if mood == '편안한' %}create-button-after{% endif %}"
-              onclick="setMood('편안한')">편안한</button>
-      <button form="speed-form" type="button" value="신나는"
-              class="create-button {% if mood == '신나는' %}create-button-after{% endif %}"
-              onclick="setMood('신나는')">신나는</button>
-    </div>
-    <div class="MusicMoodButtonContainer">
-      <button form="speed-form" type="button" value="잔잔한"
-              class="create-button {% if mood == '잔잔한' %}create-button-after{% endif %}"
-              onclick="setMood('잔잔한')">잔잔한</button>
-      <button form="speed-form" type="button" value="흥겨운"
-              class="create-button {% if mood == '흥겨운' %}create-button-after{% endif %}"
-              onclick="setMood('흥겨운')">흥겨운</button>
-    </div>
-    <input type="hidden" name="mood" id="selected-mood" form="speed-form" value="{{ mood }}">
-  </div>
-
-  <div class="Controller">
-    <p class="ControllerTitle">03</p>
-    <p class="ControllerSubtitle">장소</p>
-    <div class="MusicPlaceButtonContainer">
-      <button form="speed-form" type="button" value="집"
-              class="create-button {% if place == '집' %}create-button-after{% endif %}"
-              onclick="setPlace('집')">집</button>
-      <button form="speed-form" type="button" value="카페"
-              class="create-button {% if place == '카페' %}create-button-after{% endif %}"
-              onclick="setPlace('카페')">카페</button>
-    </div>
-    <div class="MusicPlaceButtonContainer">
-      <button form="speed-form" type="button" value="산책"
-              class="create-button {% if place == '산책' %}create-button-after{% endif %}"
-              onclick="setPlace('산책')">산책</button>
-      <button form="speed-form" type="button" value="운동"
-              class="create-button {% if place == '운동' %}create-button-after{% endif %}"
-              onclick="setPlace('운동')">운동</button>
-    </div>
-    <div class="MusicPlaceButtonContainer">
-      <button form="speed-form" type="button" value="학교"
-              class="create-button {% if place == '학교' %}create-button-after{% endif %}"
-              onclick="setPlace('학교')">학교</button>
-      <button form="speed-form" type="button" value="산"
-              class="create-button {% if place == '산' %}create-button-after{% endif %}"
-              onclick="setPlace('산')">산</button>
-    </div>
-    <input type="hidden" name="place" id="selected-place" form="speed-form" value="{{ place }}">
-  </div>
-
-  <button type="submit" form="speed-form" class="ChangeStepButton">다음 단계</button>
-</div>
-
-<script>
-  function setMood(value) {
-    document.getElementById('selected-mood').value = value;
-
-    // 모든 무드 버튼에서 active 클래스 제거
-    const moodButtons = document.querySelectorAll('.MusicMoodButtonContainer button');
-    moodButtons.forEach(button => {
-      if (button.value === value) {
-        button.classList.add('create-button-after');
-        button.classList.remove('create-button');
-      } else {
-        button.classList.remove('create-button-after');
-        button.classList.add('create-button');
-      }
-    });
-  }
-
-  function setPlace(value) {
-    document.getElementById('selected-place').value = value;
-
-    // 모든 장소 버튼에서 active 클래스 제거
-    const placeButtons = document.querySelectorAll('.MusicPlaceButtonContainer button');
-    placeButtons.forEach(button => {
-      if (button.value === value) {
-        button.classList.add('create-button-after');
-        button.classList.remove('create-button');
-      } else {
-        button.classList.remove('create-button-after');
-        button.classList.add('create-button');
-      }
-    });
-  }
-</script>
-
-{% elif prompt_step == 2 %}
-<div class="MusicStringPromptContainer">
-  <div class="PromptInputContainer">
-    <p class="PromptTitle">더 원하는 내용을 작성해주세요.</p>
-    <form action="{{ url_for('create_controller.generate_music') }}" method="post">
-      <input type="text" name="str_prompt" class="PromptInput"
-             placeholder="예시 : 유튜브에 사용할 광활한 음악"
-             value="{{ str_prompt }}">
-      <button type="submit" class="GeneratePromptButton">음악 생성하기</button>
-    </form>
-  </div>
-</div>
-{% endif %}
-
 <style>
   .create-controller-container {
     display: flex;
@@ -297,5 +174,269 @@
     font-size: 1.2rem;
     margin: 1rem 0;
   }
+
+  /* 이미지 모드 스타일 */
+  .create-mode-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+
+  .create-mode-button {
+    width: 10rem;
+    height: 2rem;
+    border: none;
+    border-radius: 1.25rem;
+    background: #fff;
+    margin-top: 1rem;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+  }
+
+  .create-image-container {
+    display: flex;
+    width: 40rem;
+    height: 35rem;
+    margin: 2rem auto;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0.875rem;
+    border: 1px solid #e2d2fe;
+    background: #fff;
+    box-shadow: -2px 5px 13px 2px rgba(0, 0, 0, 0.25);
+  }
+
+  .image-upload-area {
+    width: 200px;
+    height: 200px;
+    border: 2px dashed #ccc;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+
+  .upload-icon {
+    width: 5rem;
+    height: 5rem;
+  }
+
+  .preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .loading-container {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .loading-img {
+    width: 30rem;
+    height: 30rem;
+  }
 </style>
+{% endblock %}
+
+{% block content %}
+{% if error %}
+<div class="error-message">{{ error }}</div>
+{% endif %}
+
+{% if is_loading %}
+<div class="loading-container">
+  <img src="{{ url_for('static', filename='img/LoadingImg.svg') }}" alt="로딩 중..." class="loading-img">
+</div>
+{% else %}
+  {% if prompt_step == 1 %}
+  <div class="create-controller-container">
+    <div class="Controller">
+      <p class="ControllerTitle">01</p>
+      <p class="ControllerSubtitle">스피드</p>
+      <div class="MusicSpeedInputContainer">
+        <form id="speed-form" action="{{ url_for('create_controller.next_step') }}" method="post">
+          <input class="MusicSpeedInput" name="speed" type="range" min="1" max="100" value="{{ speed }}">
+          <div class="SpeedValueContainer">
+            <p class="SpeedValue">Slow</p>
+            <p class="SpeedValue">Fast</p>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="Controller">
+      <p class="ControllerTitle">02</p>
+      <p class="ControllerSubtitle">분위기</p>
+      <div class="MusicMoodButtonContainer">
+        <button form="speed-form" type="button" value="편안한"
+                class="create-button {% if mood == '편안한' %}create-button-after{% endif %}"
+                onclick="setMood('편안한')">편안한</button>
+        <button form="speed-form" type="button" value="신나는"
+                class="create-button {% if mood == '신나는' %}create-button-after{% endif %}"
+                onclick="setMood('신나는')">신나는</button>
+      </div>
+      <div class="MusicMoodButtonContainer">
+        <button form="speed-form" type="button" value="잔잔한"
+                class="create-button {% if mood == '잔잔한' %}create-button-after{% endif %}"
+                onclick="setMood('잔잔한')">잔잔한</button>
+        <button form="speed-form" type="button" value="흥겨운"
+                class="create-button {% if mood == '흥겨운' %}create-button-after{% endif %}"
+                onclick="setMood('흥겨운')">흥겨운</button>
+      </div>
+      <input type="hidden" name="mood" id="selected-mood" form="speed-form" value="{{ mood }}">
+    </div>
+
+    <div class="Controller">
+      <p class="ControllerTitle">03</p>
+      <p class="ControllerSubtitle">장소</p>
+      <div class="MusicPlaceButtonContainer">
+        <button form="speed-form" type="button" value="집"
+                class="create-button {% if place == '집' %}create-button-after{% endif %}"
+                onclick="setPlace('집')">집</button>
+        <button form="speed-form" type="button" value="카페"
+                class="create-button {% if place == '카페' %}create-button-after{% endif %}"
+                onclick="setPlace('카페')">카페</button>
+      </div>
+      <div class="MusicPlaceButtonContainer">
+        <button form="speed-form" type="button" value="산책"
+                class="create-button {% if place == '산책' %}create-button-after{% endif %}"
+                onclick="setPlace('산책')">산책</button>
+        <button form="speed-form" type="button" value="운동"
+                class="create-button {% if place == '운동' %}create-button-after{% endif %}"
+                onclick="setPlace('운동')">운동</button>
+      </div>
+      <div class="MusicPlaceButtonContainer">
+        <button form="speed-form" type="button" value="학교"
+                class="create-button {% if place == '학교' %}create-button-after{% endif %}"
+                onclick="setPlace('학교')">학교</button>
+        <button form="speed-form" type="button" value="산"
+                class="create-button {% if place == '산' %}create-button-after{% endif %}"
+                onclick="setPlace('산')">산</button>
+      </div>
+      <input type="hidden" name="place" id="selected-place" form="speed-form" value="{{ place }}">
+    </div>
+
+    <button type="submit" form="speed-form" class="ChangeStepButton">다음 단계</button>
+  </div>
+  {% elif prompt_step == 2 %}
+  <div class="MusicStringPromptContainer">
+    <div class="PromptInputContainer">
+      <p class="PromptTitle">더 원하는 내용을 작성해주세요.</p>
+      <form action="{{ url_for('create_controller.generate_music') }}" method="post">
+        <input type="text" name="str_prompt" class="PromptInput"
+               placeholder="예시 : 유튜브에 사용할 광활한 음악"
+               value="{{ str_prompt }}">
+        <button type="submit" class="GeneratePromptButton">음악 생성하기</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+{% endif %}
+
+<!-- 이미지로 음악 생성 모드 추가 -->
+<div class="create-mode-toggle">
+  <form action="{{ url_for('create_controller.toggle_image_mode') }}" method="post">
+    <input type="hidden" name="toggle" value="1">
+    <button type="submit" class="create-mode-button">
+      {% if is_image_mode %}
+      직접 선택해 음악 생성하기
+      {% else %}
+      이미지로 음악 생성하기
+      {% endif %}
+    </button>
+  </form>
+</div>
+
+<!-- 이미지 모드 UI -->
+{% if is_image_mode %}
+<div class="create-image-container">
+  <form action="{{ url_for('create_controller.generate_music_by_image') }}" method="post" enctype="multipart/form-data" id="image-form">
+    <div class="image-upload-area" id="image-upload-area" onclick="triggerFileInput()">
+      {% if preview_url %}
+      <img src="{{ preview_url }}" alt="미리보기" class="preview-image">
+      {% else %}
+      <img src="{{ url_for('static', filename='img/imageUpload.svg') }}" alt="이미지 업로드" class="upload-icon">
+      {% endif %}
+      <input type="file" name="image" id="image-input" accept="image/*" style="display:none" onchange="handleImageChange(event)">
+    </div>
+    <button type="submit" class="GeneratePromptButton">사진으로 음악 생성하기</button>
+  </form>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function setMood(value) {
+    document.getElementById('selected-mood').value = value;
+
+    // 모든 무드 버튼에서 active 클래스 제거
+    const moodButtons = document.querySelectorAll('.MusicMoodButtonContainer button');
+    moodButtons.forEach(button => {
+      if (button.value === value) {
+        button.classList.add('create-button-after');
+        button.classList.remove('create-button');
+      } else {
+        button.classList.remove('create-button-after');
+        button.classList.add('create-button');
+      }
+    });
+  }
+
+  function setPlace(value) {
+    document.getElementById('selected-place').value = value;
+
+    // 모든 장소 버튼에서 active 클래스 제거
+    const placeButtons = document.querySelectorAll('.MusicPlaceButtonContainer button');
+    placeButtons.forEach(button => {
+      if (button.value === value) {
+        button.classList.add('create-button-after');
+        button.classList.remove('create-button');
+      } else {
+        button.classList.remove('create-button-after');
+        button.classList.add('create-button');
+      }
+    });
+  }
+
+  {% if is_image_mode %}
+  function triggerFileInput() {
+    document.getElementById('image-input').click();
+  }
+
+  function handleImageChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const previewArea = document.getElementById('image-upload-area');
+
+      // 기존 이미지 제거
+      const existingImage = previewArea.querySelector('img');
+      if (existingImage) {
+        previewArea.removeChild(existingImage);
+      }
+
+      // 새 이미지 추가
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.alt = "미리보기";
+      img.className = "preview-image";
+      previewArea.appendChild(img);
+
+      alert('사진이 성공적으로 업로드되었습니다!');
+    };
+    reader.readAsDataURL(file);
+  }
+  {% endif %}
+</script>
 {% endblock %}

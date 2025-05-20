@@ -1,4 +1,45 @@
-<button class="process-button-container" onclick="handleGoogleLogin()">
-  <img class="social-img" src="{{ url_for('static', filename='img/google.png') }}" alt="Google Logo">
+<a href="{{ url_for('auth.direct_google_login') }}" class="process-button-container" role="button" aria-label="Google 계정으로 로그인">
+  <img class="social-img" src="{{ url_for('static', filename='img/google.png') }}" alt="Google 로고">
   <p class="process-button-content">Login With Google</p>
-</button>
+</a>
+
+<script>
+  // 기존 handleGoogleLogin 함수 호환성 유지
+  function handleGoogleLogin() {
+    window.location.href = "{{ url_for('auth.direct_google_login') }}";
+  }
+</script>
+
+<style>
+  .process-button-container {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    color: #333;
+    text-decoration: none;
+    margin: 10px 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .process-button-container:hover {
+    background-color: #f5f5f5;
+    border-color: #ccc;
+  }
+
+  .social-img {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+  }
+
+  .process-button-content {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+  }
+</style>

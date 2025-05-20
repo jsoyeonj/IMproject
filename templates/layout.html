@@ -4,14 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Croffle</title>
+    <!-- 기본 스타일시트 -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
+    <!-- 각 페이지의 블록에서 추가 CSS를 넣을 수 있도록 함 -->
+    {% block styles %}{% endblock %}
 </head>
 <body>
     <div id="root" class="layout-box">
         {% block content %}{% endblock %}
     </div>
 
+    <!-- 기본 스크립트 -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+
+    <!-- 각 페이지의 블록에서 추가 스크립트를 넣을 수 있도록 함 -->
+    {% block scripts %}{% endblock %}
 </body>
 </html>
