@@ -1,17 +1,30 @@
-{% macro play_tab(music_url='') %}
-<div id="play-tab" class="play-tab" data-music-url="{{ music_url }}">
-  <audio id="audio-player" controls>
+{% macro play_tab(music_url='', music_id=0) %}
+<div id="play-tab" class="play-tab-container" data-music-url="{{ music_url }}" data-music-id="{{ music_id }}">
+  <img class="tab-img" src="{{ url_for('static', filename='img/record.svg') }}" alt="tab-img">
+  <button class="play-bgm-button" onclick="togglePlayback()">
+    <img id="play-icon" class="play-icon" src="{{ url_for('static', filename='img/playIcon.svg') }}" alt="playIcon">
+  </button>
+
+  <audio id="audio-player" style="display: none;">
     <source id="audio-source" src="{{ music_url }}" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
 </div>
 
 <script>
+  // 오디오 상태 객체
+  const tabAudioState = {
+    isPlaying: false,
+    progressInterval: null
+  };
+
   // 페이지 로드 시 실행
   document.addEventListener('DOMContentLoaded', function() {
     const playTab = document.getElementById('play-tab');
     if (playTab) {
       const musicUrl = playTab.getAttribute('data-music-url');
+      const musicId = parseInt(playTab.getAttribute('data-music-id') || '0');
+
       if (musicUrl) {
         const audioSource = document.getElementById('audio-source');
         if (audioSource) {
@@ -20,23 +33,204 @@
         const audioPlayer = document.getElementById('audio-player');
         if (audioPlayer) {
           audioPlayer.load(); // 오디오 소스가 변경되었으므로 다시 로드
+
+          // 재생 종료 시 이벤트 처리
+          audioPlayer.addEventListener('ended', function() {
+            tabAudioState.isPlaying = false;
+            const playIcon = document.getElementById('play-icon');
+            if (playIcon) {
+              playIcon.src = "{{ url_for('static', filename='img/playIcon.svg') }}";
+            }
+
+            // 서버에 상태 저장
+            updateAudioState(musicId, musicUrl, false);
+          });
         }
       }
+
+      // 서버에서 상태 가져오기
+      checkServerAudioState();
     }
   });
+
+  // 서버에서 오디오 상태 확인
+  function checkServerAudioState() {
+    fetch('/api/audio/state')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && data.response) {
+          const state = data.response;
+
+          if (state.isPlaying) {
+            const audioPlayer = document.getElementById('audio-player');
+            if (audioPlayer) {
+              // 음악 재생
+              audioPlayer.play()
+                .then(() => {
+                  tabAudioState.isPlaying = true;
+
+                  // 아이콘 변경
+                  const playIcon = document.getElementById('play-icon');
+                  if (playIcon) {
+                    playIcon.src = "{{ url_for('static', filename='img/playIcon.svg') }}";
+                  }
+
+                  // 재생 위치 설정 (진행률에 따라)
+                  if (state.progress > 0) {
+                    const duration = audioPlayer.duration;
+                    if (!isNaN(duration)) {
+                      audioPlayer.currentTime = (state.progress / 100) * duration;
+                    }
+                  }
+                })
+                .catch(error => {
+                  console.error('오디오 재생 오류:', error);
+                });
+            }
+          }
+        }
+      })
+      .catch(error => {
+        console.error('오디오 상태 조회 오류:', error);
+      });
+  }
+
+  // 재생/정지 토글
+  function togglePlayback() {
+    const audioPlayer = document.getElementById('audio-player');
+    const playTab = document.getElementById('play-tab');
+    const playIcon = document.getElementById('play-icon');
+
+    if (!audioPlayer || !playTab || !playIcon) return;
+
+    const musicUrl = playTab.getAttribute('data-music-url');
+    const musicId = parseInt(playTab.getAttribute('data-music-id') || '0');
+
+    if (!musicUrl) {
+      console.error('음악 URL이 없습니다.');
+      return;
+    }
+
+    if (tabAudioState.isPlaying) {
+      // 음악 정지
+      audioPlayer.pause();
+      tabAudioState.isPlaying = false;
+      playIcon.src = "{{ url_for('static', filename='img/playIcon.svg') }}";
+
+      // 서버에 상태 저장
+      updateAudioState(musicId, musicUrl, false);
+    } else {
+      // 음악 재생
+      audioPlayer.play()
+        .then(() => {
+          tabAudioState.isPlaying = true;
+          playIcon.src = "{{ url_for('static', filename='img/stopButton.svg') }}";
+
+          // 서버에 상태 저장
+          updateAudioState(musicId, musicUrl, true);
+        })
+        .catch(error => {
+          console.error('오디오 재생 오류:', error);
+        });
+    }
+  }
+
+  // 서버에 오디오 상태 업데이트
+  function updateAudioState(musicId, musicUrl, isPlaying) {
+    if (isPlaying) {
+      // 재생 시작
+      fetch('/api/audio/play', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          musicId: musicId,
+          musicUrl: musicUrl
+        })
+      }).catch(error => {
+        console.error('오디오 상태 저장 오류:', error);
+      });
+    } else {
+      // 재생 중지
+      fetch('/api/audio/stop', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).catch(error => {
+        console.error('오디오 상태 저장 오류:', error);
+      });
+    }
+
+    // 현재 재생 위치 저장 (주기적으로)
+    if (isPlaying) {
+      const audioPlayer = document.getElementById('audio-player');
+      if (audioPlayer) {
+        if (tabAudioState.progressInterval) {
+          clearInterval(tabAudioState.progressInterval);
+        }
+
+        tabAudioState.progressInterval = setInterval(() => {
+          const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+
+          // 10초마다 또는 10% 단위로 저장 (너무 자주 요청하지 않도록)
+          if (Math.floor(progress) % 10 === 0) {
+            fetch('/api/audio/progress', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                progress: progress
+              })
+            }).catch(error => {
+              console.error('진행 상태 업데이트 오류:', error);
+            });
+          }
+        }, 1000); // 1초마다 체크
+      }
+    } else {
+      // 타이머 중지
+      if (tabAudioState.progressInterval) {
+        clearInterval(tabAudioState.progressInterval);
+        tabAudioState.progressInterval = null;
+      }
+    }
+  }
 </script>
 
 <style>
-  .play-tab {
+  .play-tab-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 1rem 0;
+    margin: 12rem 0 0 4rem;
   }
 
-  #audio-player {
-    width: 300px;
+  .tab-img {
+    width: 20rem;
+    height: 100%;
+  }
+
+  .play-bgm-button {
+    position: relative;
+    margin-top: -3rem;
+    width: 5em;
+    height: 5rem;
+    background-color: #3d1655;
+    font-size: 1rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 100%;
+    cursor: pointer;
+  }
+
+  .play-icon {
+    width: 2rem;
+    height: 2rem;
+    margin-top: 1rem;
   }
 </style>
 {% endmacro %}
@@ -45,6 +239,6 @@
 {% if not call_macro %}
 {% extends "layout.html" %}
 {% block content %}
-  {{ play_tab(music_url) }}
+  {{ play_tab(music_url, music_id) }}
 {% endblock %}
 {% endif %}

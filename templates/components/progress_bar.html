@@ -1,5 +1,6 @@
-<div class="progress-bar-container">
-  <div class="progress" id="progress-bar" style="width: 0%;"></div>
+{% macro progress_bar(progress=0) %}
+<div class="progress-bar-container" data-progress="{{ progress }}">
+  <div class="progress" id="progress-bar" style="width: {{ progress }}%;"></div>
 </div>
 
 <script>
@@ -20,4 +21,40 @@
       updateProgressBar(Number(progress));
     }
   });
+
+  // 커스텀 이벤트 리스너 추가: 진행도 업데이트 이벤트
+  document.addEventListener('progressUpdate', function(e) {
+    if (e.detail && typeof e.detail.progress === 'number') {
+      updateProgressBar(e.detail.progress);
+    }
+  });
 </script>
+
+<style>
+  .progress-bar-container {
+    display: flex;
+    width: 100%;
+    height: 0.5rem;
+    background-color: #d8d8d8;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin: 0.5rem 0;
+  }
+
+  .progress {
+    width: 0%;
+    height: 100%;
+    background-color: #3d1655;
+    border-radius: 0.5rem;
+    transition: width 0.1s ease-in-out;
+  }
+</style>
+{% endmacro %}
+
+{# 이 파일이 직접 호출된 경우 기본 템플릿으로 렌더링 #}
+{% if not call_macro %}
+{% extends "layout.html" %}
+{% block content %}
+  {{ progress_bar(progress|default(0)) }}
+{% endblock %}
+{% endif %}

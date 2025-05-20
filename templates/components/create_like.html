@@ -1,0 +1,345 @@
+{% extends "layout.html" %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/PlayList.css') }}">
+
+<div class="create-background">
+  <div class="create-form-header" onclick="location.href='/'">
+    <p>Croffle</p>
+  </div>
+
+  <div class="playlist-container">
+    <div class="column-box">
+      <div class="playlist-title">실시간 생성 중!</div>
+      <div class="playlist-wrapper" id="recent-playlist">
+        <!-- 여기에 일반 플레이리스트가 자바스크립트로 추가됩니다 -->
+        <div class="playlist">실시간 생성중!</div>
+      </div>
+    </div>
+
+    <div class="column-box">
+      <div class="playlist-title">이번주 인기음악</div>
+      <div class="playlist-wrapper" id="popular-playlist">
+        <!-- 여기에 인기 플레이리스트가 자바스크립트로 추가됩니다 -->
+        <div class="popular-playlist"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  let currentAudio = null;
+  let currentMusicId = 0;
+  let isPlaying = false;
+
+  // 일반 플레이리스트 가져오기
+  fetch('/api/playlist')
+    .then(response => response.json())
+    .then(data => {
+      const playlistContainer = document.querySelector('#recent-playlist .playlist');
+      playlistContainer.innerHTML = '';
+
+      data.forEach(music => {
+        const musicItem = createMusicItem(music);
+        playlistContainer.appendChild(musicItem);
+      });
+    })
+    .catch(error => {
+      console.error('일반 플레이리스트 조회 오류:', error);
+    });
+
+  // 인기 플레이리스트 가져오기
+  fetch('/api/playlist/popular')
+    .then(response => response.json())
+    .then(data => {
+      const playlistContainer = document.querySelector('#popular-playlist .popular-playlist');
+      playlistContainer.innerHTML = '';
+
+      data.forEach(music => {
+        const musicItem = createMusicItem(music);
+        playlistContainer.appendChild(musicItem);
+      });
+    })
+    .catch(error => {
+      console.error('인기 플레이리스트 조회 오류:', error);
+    });
+
+  // 음악 아이템 생성 함수
+  function createMusicItem(music) {
+    const musicContainer = document.createElement('div');
+    musicContainer.className = 'musicContainer2';
+    musicContainer.dataset.musicId = music.musicId;
+    musicContainer.dataset.musicUrl = music.musicUrl;
+
+    // 음악 이미지
+    const musicImg = document.createElement('img');
+    musicImg.className = 'music-img';
+    musicImg.src = "{{ url_for('static', filename='img/musicImg.svg') }}";
+    musicContainer.appendChild(musicImg);
+
+    // 음악 제목
+    const musicTitle = document.createElement('div');
+    musicTitle.className = 'music-title';
+    musicTitle.textContent = music.title;
+    musicContainer.appendChild(musicTitle);
+
+    // 좋아요 버튼
+    const musicLike = document.createElement('div');
+    musicLike.className = 'music-like';
+
+    const likeButton = document.createElement('button');
+    likeButton.onclick = function() { handleMusicLike(music.musicId); };
+
+    const likeImg = document.createElement('img');
+    likeImg.src = music.pressed
+      ? "{{ url_for('static', filename='img/LikeAfter.svg') }}"
+      : "{{ url_for('static', filename='img/LikeBefore.svg') }}";
+    likeButton.appendChild(likeImg);
+
+    const likeCount = document.createElement('p');
+    likeCount.textContent = music.like;
+
+    musicLike.appendChild(likeButton);
+    musicLike.appendChild(likeCount);
+    musicContainer.appendChild(musicLike);
+
+    // 재생 버튼
+    const musicPlayButton = document.createElement('div');
+    musicPlayButton.className = 'music-play-button';
+
+    const playButton = document.createElement('button');
+    playButton.onclick = function() {
+      if (currentMusicId === music.musicId && isPlaying) {
+        stopMusic();
+      } else {
+        playMusic(music.musicId, music.musicUrl);
+      }
+    };
+
+    const playImg = document.createElement('img');
+    playImg.src = "{{ url_for('static', filename='img/stopButton.svg') }}";
+    playImg.classList.add('play-icon');
+    playImg.dataset.musicId = music.musicId;
+
+    playButton.appendChild(playImg);
+    musicPlayButton.appendChild(playButton);
+    musicContainer.appendChild(musicPlayButton);
+
+    return musicContainer;
+  }
+
+  // 음악 좋아요 처리 함수
+  function handleMusicLike(musicId) {
+    // 로그인 확인
+    fetch('/api/member/check')
+      .then(response => response.json())
+      .then(data => {
+        if (!data.isMember) {
+          alert('로그인이 필요한 서비스입니다.');
+          return;
+        }
+
+        // 좋아요 API 호출
+        return fetch('/api/music/like', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ musicId: musicId })
+        });
+      })
+      .then(response => {
+        if (response && response.ok) {
+          // 성공적으로 좋아요 처리 후 페이지 새로고침
+          window.location.reload();
+        }
+      })
+      .catch(error => {
+        console.error('좋아요 처리 오류:', error);
+      });
+  }
+
+  // 음악 재생 함수
+  function playMusic(musicId, musicUrl) {
+    // 이미 재생 중인 음악이 있으면 중지
+    if (currentAudio) {
+      currentAudio.pause();
+
+      // 이전에 재생 중이던 음악의 아이콘 업데이트
+      const prevIcon = document.querySelector(`.play-icon[data-music-id="${currentMusicId}"]`);
+      if (prevIcon) {
+        prevIcon.src = "{{ url_for('static', filename='img/stopButton.svg') }}";
+      }
+    }
+
+    // 새 음악 재생
+    currentAudio = new Audio(musicUrl);
+    currentAudio.play();
+    currentMusicId = musicId;
+    isPlaying = true;
+
+    // 현재 재생 중인 음악의 아이콘 업데이트
+    const currentIcon = document.querySelector(`.play-icon[data-music-id="${musicId}"]`);
+    if (currentIcon) {
+      currentIcon.src = "{{ url_for('static', filename='img/playButton.svg') }}";
+    }
+  }
+
+  // 음악 중지 함수
+  function stopMusic() {
+    if (currentAudio) {
+      currentAudio.pause();
+
+      // 아이콘 업데이트
+      const currentIcon = document.querySelector(`.play-icon[data-music-id="${currentMusicId}"]`);
+      if (currentIcon) {
+        currentIcon.src = "{{ url_for('static', filename='img/stopButton.svg') }}";
+      }
+
+      isPlaying = false;
+    }
+  }
+});
+</script>
+
+<style>
+  .create-background {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    vertical-align: bottom;
+    background: linear-gradient(
+      119deg,
+      #fff 0%,
+      #dfd0ff 46%,
+      #faf7ff 100%,
+      #cc46b7 100%
+    );
+    background-size: cover;
+  }
+
+  .create-form-header {
+    position: absolute;
+    left: 0;
+    margin: 5rem 0 0 4rem;
+    cursor: pointer;
+  }
+
+  .create-form-header p {
+    font-size: 2rem;
+    font-weight: 300;
+    color: #000;
+    letter-spacing: 0.125rem;
+    text-transform: capitalize;
+  }
+
+  .playlist-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .playlist-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 30rem;
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    margin: 2rem 2rem;
+  }
+
+  .playlist-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+
+  .music-img {
+    width: 4rem;
+    height: 4rem;
+    margin-left: 0.5rem;
+  }
+
+  .music-title {
+    width: 10rem;
+    height: 5rem;
+    margin: 0.75rem 0 0 1.5rem;
+    font-size: 1rem;
+  }
+
+  .music-like {
+    display: flex;
+    align-items: center;
+    margin-left: 1.5rem;
+  }
+
+  .music-like img {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .music-like p {
+    font-size: 1rem;
+    margin-left: 0.5rem;
+  }
+
+  .music-play-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 5rem;
+    height: 5rem;
+    position: relative;
+  }
+
+  .music-play-button img {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .popular-playlist, .playlist {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20rem;
+  }
+
+  .playlist-title {
+    display: flex;
+    justify-content: center;
+    font-size: 3rem;
+  }
+
+  .musicContainer2 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.25rem;
+    margin: 0.5rem;
+    width: 25rem;
+    height: 5rem;
+    border-radius: 1rem;
+    background: #e3e5ff;
+    box-shadow:
+      0px 3px 5px 0px rgba(0, 0, 0, 0.25) inset,
+      0px 4px 5px 3px rgba(134, 126, 126, 0.25);
+  }
+
+  .column-box {
+    display: flex;
+    flex-direction: column;
+  }
+
+  button {
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+</style>
+{% endblock %}
