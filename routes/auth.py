@@ -4,9 +4,13 @@ import requests
 import json
 import os
 from flask import jsonify
+from dotenv import load_dotenv
 
 # from models.auth import create_google_login_response, create_login_error_response
-
+# .env 파일 로드
+load_dotenv()
+# 개발 환경에서 HTTPS 요구 사항 비활성화
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 # 구글 OAuth 설정
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
