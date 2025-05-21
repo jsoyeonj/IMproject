@@ -5,13 +5,53 @@
   <div class="home-container">
     <h1 class="home-title">Croffle</h1>
     <h2 class="home-subtitle">하나뿐인 작업곡을 만들어보세요</h2>
-    <!-- ProcessButton 컴포넌트 포함 -->
-    {% if is_member %}
+    <div class="buttons-container">
+      <!-- ProcessButton 컴포넌트 포함 -->
       {% include 'components/process_button.html' with context %}
-    {% else %}
-      {% include 'components/process_button.html' with context %}
+      <!-- Google 로그인 버튼 포함 -->
       {% include 'components/google_login_button.html' %}
-    {% endif %}
+    </div>
   </div>
 </div>
+{% endblock %}
+
+{% block styles %}
+<style>
+  .buttons-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;  /* 버튼 사이 간격 */
+  }
+
+  /* 버튼 크기 동일하게 설정 */
+  .process-button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20rem;
+    height: 4rem;
+    margin-top: 2.5rem;
+    border: none;
+    border-radius: 1.25rem;
+    background: #fff;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    text-decoration: none;  /* a 태그 밑줄 제거 */
+  }
+
+  .play-img {
+    width: 2rem;
+    height: 2rem;
+    margin-right: 1rem;
+  }
+
+  .process-button-content {
+    font-size: 1.5rem;
+    color: #5d5d5d;
+    font-style: normal;
+    font-weight: 500;
+    margin: 0;
+  }
+</style>
 {% endblock %}
