@@ -290,7 +290,7 @@ def internal_error(error):
 
 
 if __name__ == '__main__':
-    print("🎵 Croffle Mobile 서버 시작!")
+    print("🎵 IM Mobile 서버 시작!")
     print("📱 모바일에서 접속: http://[컴퓨터IP]:5000")
     print("💻 로컬에서 접속: http://localhost:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)
