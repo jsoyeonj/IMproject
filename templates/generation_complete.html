@@ -1,0 +1,497 @@
+{% extends "base.html" %}
+
+{% block title %}Croffle - 음악 생성 완료!{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        text-align: center;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .success-animation {
+        margin-bottom: 2rem;
+        animation: successPop 0.6s ease-out;
+    }
+
+    @keyframes successPop {
+        0% { transform: scale(0.3); opacity: 0; }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .success-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(45deg, #2ed573, #7bed9f);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        box-shadow: 0 8px 25px rgba(46, 213, 115, 0.4);
+    }
+
+    .checkmark {
+        width: 40px;
+        height: 40px;
+        stroke: white;
+        stroke-width: 3;
+        fill: none;
+        animation: checkmarkDraw 0.8s ease-out 0.3s both;
+    }
+
+    @keyframes checkmarkDraw {
+        0% { stroke-dasharray: 0 50; }
+        100% { stroke-dasharray: 50 0; }
+    }
+
+    .title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .subtitle {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 3rem;
+        line-height: 1.5;
+    }
+
+    .record-section {
+        margin: 2rem 0;
+        position: relative;
+    }
+
+    .record-container {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        margin: 0 auto;
+    }
+
+    .record {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, #2c2c2c, #1a1a1a);
+        border-radius: 50%;
+        box-shadow:
+            0 0 0 8px #333,
+            0 8px 30px rgba(0, 0, 0, 0.5);
+        position: relative;
+        animation: autoSpin 4s linear infinite;
+    }
+
+    @keyframes autoSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .record::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        background: #ff6b6b;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .record::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100px;
+        height: 100px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* 톤암 추가 */
+    .tonearm {
+        position: absolute;
+        top: 20%;
+        right: -5%;
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(90deg, #4a5568, #2d3748);
+        border-radius: 2px;
+        transform-origin: right center;
+        animation: tonearmMove 4s ease-in-out infinite;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .tonearm::before {
+        content: '';
+        position: absolute;
+        right: -8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        background: #2d3748;
+        border-radius: 50%;
+    }
+
+    .tonearm::after {
+        content: '';
+        position: absolute;
+        left: -3px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 8px;
+        height: 8px;
+        background: #e53e3e;
+        border-radius: 50%;
+    }
+
+    @keyframes tonearmMove {
+        0%, 100% { transform: rotate(-10deg); }
+        50% { transform: rotate(-5deg); }
+    }
+
+    .play-btn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 107, 107, 0.9);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .play-btn:hover {
+        background: #ff6b6b;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+        max-width: 300px;
+        margin-top: 2rem;
+    }
+
+    .action-btn {
+        padding: 1rem 1.5rem;
+        border: none;
+        border-radius: 15px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 50px;
+    }
+
+    .action-btn.primary {
+        background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+        color: white;
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    }
+
+    .action-btn.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+    }
+
+    .action-btn.secondary {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .action-btn.secondary:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .music-info {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        width: 100%;
+        max-width: 350px;
+    }
+
+    .music-title {
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .music-details {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    /* 파티클 애니메이션 */
+    .particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        animation: floatUp 3s ease-out infinite;
+    }
+
+    @keyframes floatUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px) scale(0);
+        }
+        10% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        90% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-100px) scale(0);
+        }
+    }
+
+    /* 반응형 */
+    @media (max-width: 480px) {
+        .container {
+            padding: 15px;
+        }
+
+        .title {
+            font-size: 2rem;
+        }
+
+        .record-container {
+            width: 160px;
+            height: 160px;
+        }
+
+        .play-btn {
+            width: 50px;
+            height: 50px;
+        }
+
+        .actions {
+            max-width: 280px;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- 파티클 효과 -->
+    <div class="particles" id="particles"></div>
+
+    <!-- 성공 애니메이션 -->
+    <div class="success-animation">
+        <div class="success-icon">
+            <svg class="checkmark" viewBox="0 0 50 50">
+                <path d="M10 25 L20 35 L40 15" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 제목 -->
+    <h1 class="title">완성되었어요! 🎵</h1>
+    <p class="subtitle">당신만의 특별한 음악이<br>만들어졌습니다</p>
+
+    <!-- 음악 정보 -->
+    <div class="music-info">
+        <div class="music-title">🎼 생성된 음악</div>
+        <div class="music-details">
+            방금 전에 생성됨<br>
+            데모 버전으로 재생됩니다
+        </div>
+    </div>
+
+    <!-- 레코드 플레이어 -->
+    <div class="record-section">
+        <div class="record-container">
+            <div class="record"></div>
+            <div class="tonearm"></div>
+            <button class="play-btn" id="playBtn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- 액션 버튼들 -->
+    <div class="actions">
+        <a href="/create" class="action-btn primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            또 만들고 싶어요
+        </a>
+
+        <a href="/playlist" class="action-btn secondary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/>
+            </svg>
+            내 음악 보기
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let isPlaying = false;
+    let audioElement = null;
+
+    // 레코드 재생/일시정지
+    document.getElementById('playBtn').addEventListener('click', function() {
+        isPlaying = !isPlaying;
+
+        if (isPlaying) {
+            // 재생 시작
+            this.innerHTML = `
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+            `;
+
+            // 데모 오디오 재생 (실제로는 서버에서 생성된 음악)
+            if (!audioElement) {
+                audioElement = new Audio('/static/audio/demo.mp3');
+                audioElement.addEventListener('ended', () => {
+                    stopPlayback();
+                });
+                audioElement.addEventListener('error', () => {
+                    showMessage('음악 파일을 찾을 수 없습니다', 'error');
+                    stopPlayback();
+                });
+            }
+
+            audioElement.play().catch(error => {
+                showMessage('음악을 재생할 수 없습니다', 'error');
+                stopPlayback();
+            });
+
+        } else {
+            stopPlayback();
+        }
+    });
+
+    function stopPlayback() {
+        isPlaying = false;
+        const playBtn = document.getElementById('playBtn');
+        playBtn.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+        `;
+
+        if (audioElement) {
+            audioElement.pause();
+            audioElement.currentTime = 0;
+        }
+    }
+
+    // 파티클 생성
+    function createParticle() {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+
+        // 랜덤 위치
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 3 + 's';
+        particle.style.animationDuration = (Math.random() * 2 + 2) + 's';
+
+        document.getElementById('particles').appendChild(particle);
+
+        // 애니메이션 완료 후 제거
+        setTimeout(() => {
+            if (particle.parentNode) {
+                particle.parentNode.removeChild(particle);
+            }
+        }, 4000);
+    }
+
+    // 페이지 로드 시 실행
+    document.addEventListener('DOMContentLoaded', function() {
+        // 성공 메시지 표시
+        setTimeout(() => {
+            showMessage('🎵 음악이 성공적으로 생성되었습니다!', 'success', 4000);
+        }, 1000);
+
+        // 파티클 효과 시작
+        for (let i = 0; i < 10; i++) {
+            setTimeout(() => {
+                createParticle();
+            }, i * 300);
+        }
+
+        // 지속적인 파티클 생성
+        setInterval(createParticle, 800);
+
+        // 햅틱 피드백 (성공)
+        if ('vibrate' in navigator) {
+            navigator.vibrate([100, 50, 100]);
+        }
+    });
+
+    // 페이지 떠날 때 오디오 정리
+    window.addEventListener('beforeunload', function() {
+        if (audioElement) {
+            audioElement.pause();
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Croffle - 음악 생성</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard variable', sans-serif;
+            height: 100vh;
+        }
+
+        /* GitHub 기존 슬라이더 스타일 완전 동일 */
+        input[type='range'] {
+            -webkit-appearance: none;
+            width: 120;
+            height: 10px;
+            outline: none;
+            border-radius: 8.1875rem;
+        }
+
+        input[type='range']::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: radial-gradient(50% 50% at 50% 50%, #946ec4 0%, #513d6c 100%);
+            cursor: pointer;
+        }
+
+        input[type='range']::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 20px;
+            border-radius: 8.1875rem;
+            background: #d9d9d9;
+            box-shadow:
+                4px 4px 10px 0px rgba(0, 0, 0, 0.35) inset,
+                -15px -15px 30px 0px #fff inset;
+        }
+
+        .music-speed-input {
+            width: 90%;
+        }
+
+        /* GitHub 기존 컨테이너 완전 동일 */
+        .create-container {
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(119deg, #fff 0%, #dfd0ff 46%, #faf7ff 100%, #cc46b7 100%);
+            background-size: cover;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* GitHub 기존 로고 버튼 완전 동일 */
+        .back-button {
+            position: absolute;
+            left: 0;
+            margin: 2rem 0 0 4rem;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .back-button p {
+            font-size: 2rem;
+            font-weight: 300;
+            color: #000;
+            letter-spacing: 0.125rem;
+            text-transform: capitalize;
+        }
+
+        /* GitHub 기존 콘텐츠 영역 완전 동일 */
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding-top: 5rem;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* GitHub 기존 왼쪽 섹션 완전 동일 */
+        .left-content {
+            position: absolute;
+            left: 4rem;
+            top: 20%;
+            text-align: left;
+        }
+
+        .title-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .title {
+            color: #513d6c;
+            font-size: 2rem;
+            font-weight: 400;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            color: #513d6c;
+            font-size: 1rem;
+            font-weight: 300;
+            margin-top: 0.5rem;
+        }
+
+        /* GitHub 기존 생성 버튼들 완전 동일 */
+        .generation-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .image-gen-btn, .video-gen-btn {
+            width: 12rem;
+            height: 2.5rem;
+            border: none;
+            border-radius: 1.25rem;
+            background: #fff;
+            box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+            cursor: pointer;
+            color: #513d6c;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .image-gen-btn:hover, .video-gen-btn:hover {
+            transform: scale(1.05);
+            background: #f8f8f8;
+        }
+
+        /* GitHub 기존 중앙 레코드 영역 완전 동일 */
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .record-img {
+            width: 20rem;
+            height: auto;
+            transition: transform 2s ease-in-out;
+        }
+
+        .record-img:hover {
+            transform: rotate(360deg);
+        }
+
+        .play-btn {
+            position: relative;
+            margin-top: -3rem;
+            width: 5rem;
+            height: 5rem;
+            background-color: #3d1655;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .play-icon {
+            width: 2rem;
+            height: 2rem;
+            margin-top: 0.5rem;
+        }
+
+        /* GitHub 기존 컨트롤러 영역 완전 동일 */
+        .controllers-area {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            width: 100%;
+            padding: 0 2rem;
+        }
+
+        .controller {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            width: 12rem;
+            height: 16rem;
+            padding: 1.5rem 1rem;
+            border-radius: 0.875rem;
+            border: 1px solid #e2d2fe;
+            background: #fff;
+            box-shadow: -2px 5px 13px 2px rgba(0, 0, 0, 0.25);
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* 마우스 올렸을 때 컨트롤러 확대 효과 */
+        .controller:hover {
+            transform: scale(1.25);
+            box-shadow: -4px 10px 25px 4px rgba(0, 0, 0, 0.35);
+            z-index: 5;
+        }
+
+        .controller-number {
+            position: absolute;
+            top: 1rem;
+            color: #513d6c;
+            text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+
+        .controller-label {
+            color: #513d6c;
+            font-size: 1rem;
+            font-weight: 300;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        /* GitHub 기존 슬라이더 컨테이너 완전 동일 */
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin-top: 2rem;
+            align-items: center;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 90%;
+            margin-top: 0.5rem;
+        }
+
+        .label {
+            color: #513d6c;
+            font-size: 0.875rem;
+            font-weight: 300;
+        }
+
+        /* GitHub 기존 버튼 그리드 완전 동일 */
+        .button-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+
+        /* GitHub 기존 버튼 스타일 완전 동일 */
+        .create-button {
+            padding: 0.4rem 1rem;
+            font-size: 1rem;
+            width: 4.6rem;
+            font-weight: 500;
+            color: #ffffff;
+            border-radius: 1rem;
+            background: linear-gradient(
+                120deg,
+                #dbbeff -0.41%,
+                rgba(212, 210, 255, 0.98) 6.15%,
+                rgba(219, 200, 243, 0.76) 35.4%,
+                rgba(219, 200, 243, 0.76) 78.69%
+            );
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .create-button:hover {
+            transform: scale(1.1);
+            background: #f0f0f0;
+            color: #513d6c;
+        }
+
+        .create-button:active {
+            background: #e3e5ff;
+        }
+
+        .create-button.selected {
+            background: linear-gradient(120deg, #946ec4 0%, #513d6c 100%);
+            color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        /* GitHub 기존 다음 단계 버튼 완전 동일 */
+        .next-step-btn {
+            position: absolute;
+            right: 4rem;
+            bottom: 4rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 6rem;
+            height: 2.5rem;
+            border: none;
+            border-radius: 1.25rem;
+            background: linear-gradient(
+                120deg,
+                #dbbeff -0.41%,
+                rgba(212, 210, 255, 0.98) 6.15%,
+                rgba(219, 200, 243, 0.76) 35.4%,
+                rgba(219, 200, 243, 0.76) 78.69%
+            );
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.3s ease, background 0.3s ease;
+            box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
+        }
+
+        .next-step-btn:hover {
+            transform: scale(1.1);
+            background: white;
+            color: #513d6c;
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+        /* 모바일 반응형 추가 */
+        @media (max-width: 1200px) {
+            .controllers-area {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .controller {
+                width: 80%;
+                max-width: 400px;
+                height: auto;
+                min-height: 14rem;
+                margin-bottom: 1.5rem;
+            }
+
+            /* 모바일에서는 호버 효과 줄임 */
+            .controller:hover {
+                transform: scale(1.05);
+            }
+
+            .left-content {
+                position: relative;
+                left: auto;
+                top: auto;
+                margin: 0 0 2rem 0;
+                text-align: center;
+            }
+
+            .center-content {
+                margin-bottom: 2rem;
+            }
+
+            .back-button {
+                margin: 1.5rem 0 0 2rem;
+            }
+
+            .next-step-btn {
+                position: static;
+                margin: 2rem auto 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding-top: 4rem;
+            }
+
+            .controller {
+                width: 90%;
+                padding: 1rem;
+            }
+
+            .record-img {
+                width: 15rem;
+            }
+
+            .play-btn {
+                width: 4rem;
+                height: 4rem;
+                margin-top: -2.5rem;
+            }
+
+            .play-icon {
+                width: 1.5rem;
+                height: 1.5rem;
+            }
+
+            .back-button {
+                margin: 1rem 0 0 1.5rem;
+            }
+
+            .back-button p {
+                font-size: 1.5rem;
+            }
+
+            .title {
+                font-size: 1.8rem;
+            }
+
+            .generation-buttons {
+                align-items: center;
+            }
+
+            .image-gen-btn, .video-gen-btn {
+                width: 10rem;
+                height: 2.2rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content-wrapper {
+                padding: 1rem;
+            }
+
+            .controller {
+                width: 95%;
+                padding: 0.8rem;
+                min-height: 12rem;
+            }
+
+            .controller-number {
+                font-size: 1.2rem;
+                top: 0.8rem;
+            }
+
+            .controller-label {
+                font-size: 0.9rem;
+                margin: 1rem 0 0.8rem 0;
+            }
+
+            .create-button {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.9rem;
+                width: 4rem;
+            }
+
+            .button-row {
+                gap: 0.6rem;
+            }
+
+            .button-grid {
+                gap: 0.6rem;
+            }
+
+            .record-img {
+                width: 12rem;
+            }
+
+            .play-btn {
+                width: 3.5rem;
+                height: 3.5rem;
+                margin-top: -2rem;
+            }
+
+            .play-icon {
+                width: 1.2rem;
+                height: 1.2rem;
+            }
+
+            .next-step-btn {
+                width: 5rem;
+                height: 2.2rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 터치 최적화 */
+        .create-button, .next-step-btn, .image-gen-btn, .video-gen-btn, .play-btn {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            min-height: 44px;
+        }
+
+        /* 메시지 스타일 */
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 1000;
+        }
+
+        .message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .message.success {
+            background-color: #4caf50;
+        }
+
+        .message.error {
+            background-color: #f44336;
+        }
+
+        .message.info {
+            background-color: #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="create-container">
+        <!-- GitHub 기존 로고 링크 완전 동일 -->
+        <div class="back-button" onclick="window.location.href='/'">
+            <p>Croffle</p>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- GitHub 기존 왼쪽 섹션 완전 동일 -->
+            <div class="left-content">
+                <div class="title-section">
+                    <h1 class="title">음악<br>생성하기</h1>
+                    <p class="subtitle">Music Generation</p>
+                    <div class="generation-buttons">
+                        <button class="image-gen-btn" id="imageGenBtn" onclick="window.location.href='/image-create'">사진으로 음악 생성하기</button>
+                        <button class="video-gen-btn" id="videoGenBtn" onclick="window.location.href='/image-create?mode=video'">동영상으로 음악 생성하기</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GitHub 기존 중앙 영역 완전 동일 -->
+            <div class="center-content">
+                <img src="/static/images/record.svg" alt="레코드" class="record-img">
+                <button class="play-btn" id="playBtn">
+                    <img src="/static/images/playIcon.svg" alt="재생" class="play-icon">
+                </button>
+            </div>
+
+            <!-- GitHub 기존 하단 영역 완전 동일 -->
+            <div class="controllers-area">
+                <!-- 컨트롤러 1: 스피드 설정 -->
+                <div class="controller">
+                    <p class="controller-number">01</p>
+                    <p class="controller-label">스피드</p>
+                    <div class="slider-container">
+                        <input type="range" min="1" max="100" value="50" class="music-speed-input" id="speedSlider">
+                        <div class="slider-labels">
+                            <p class="label">Slow</p>
+                            <p class="label">Fast</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 컨트롤러 2: 분위기 설정 -->
+                <div class="controller">
+                    <p class="controller-number">02</p>
+                    <p class="controller-label">분위기</p>
+                    <div class="button-grid">
+                        <div class="button-row">
+                            <button class="create-button" data-value="편안한">편안한</button>
+                            <button class="create-button" data-value="신나는">신나는</button>
+                        </div>
+                        <div class="button-row">
+                            <button class="create-button" data-value="잔잔한">잔잔한</button>
+                            <button class="create-button" data-value="흥겨운">흥겨운</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 컨트롤러 3: 장소 설정 -->
+                <div class="controller">
+                    <p class="controller-number">03</p>
+                    <p class="controller-label">장소</p>
+                    <div class="button-grid">
+                        <div class="button-row">
+                            <button class="create-button" data-value="집">집</button>
+                            <button class="create-button" data-value="카페">카페</button>
+                        </div>
+                        <div class="button-row">
+                            <button class="create-button" data-value="산책">산책</button>
+                            <button class="create-button" data-value="운동">운동</button>
+                        </div>
+                        <div class="button-row">
+                            <button class="create-button" data-value="학교">학교</button>
+                            <button class="create-button" data-value="산">산</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GitHub 기존 다음 단계 버튼 완전 동일 -->
+            <div class="next-step-btn" id="nextStepBtn">다음 단계</div>
+        </div>
+    </div>
+
+    <script>
+        // GitHub 기존 JavaScript 코드 완전 동일 + 모바일 최적화 추가
+
+        // 요소 선택
+        const speedSlider = document.getElementById('speedSlider');
+        const createButtons = document.querySelectorAll('.create-button');
+        const nextStepBtn = document.getElementById('nextStepBtn');
+        const playBtn = document.getElementById('playBtn');
+        const recordImg = document.querySelector('.record-img');
+        const imageGenBtn = document.getElementById('imageGenBtn');
+        const videoGenBtn = document.getElementById('videoGenBtn');
+
+        // 선택된 값 관리
+        let selectedSpeed = speedSlider ? speedSlider.value : 50;
+        let selectedMood = '';
+        let selectedPlace = '';
+        let isPlaying = false;
+        let recordRotation = null;
+
+        // 레코드 회전 애니메이션 함수
+        function startRecordRotation() {
+            if (recordRotation) return;
+
+            let degree = 0;
+            recordRotation = setInterval(() => {
+                degree += 1;
+                if (recordImg) {
+                    recordImg.style.transform = `rotate(${degree}deg)`;
+                }
+            }, 30);
+        }
+
+        function stopRecordRotation() {
+            if (recordRotation) {
+                clearInterval(recordRotation);
+                recordRotation = null;
+
+                if (recordImg) {
+                    const currentTransform = window.getComputedStyle(recordImg).getPropertyValue('transform');
+                    const matrix = new DOMMatrix(currentTransform);
+                    const angle = Math.atan2(matrix.b, matrix.a) * (180 / Math.PI);
+
+                    recordImg.style.transition = 'none';
+                    recordImg.style.transform = `rotate(${angle}deg)`;
+
+                    void recordImg.offsetWidth;
+
+                    recordImg.style.transition = 'transform 2s ease-in-out';
+                }
+            }
+        }
+
+        // 레코드 재생/일시정지 기능
+        if (playBtn) {
+            playBtn.addEventListener('click', function() {
+                if (isPlaying) {
+                    isPlaying = false;
+                    this.querySelector('.play-icon').src = '/static/images/playIcon.svg';
+                    stopRecordRotation();
+                } else {
+                    isPlaying = true;
+                    this.querySelector('.play-icon').src = '/static/images/pauseIcon.svg';
+                    startRecordRotation();
+                }
+            });
+        }
+
+        // 스피드 슬라이더 이벤트
+        if (speedSlider) {
+            speedSlider.addEventListener('input', function() {
+                selectedSpeed = this.value;
+            });
+        }
+
+        // 버튼 클릭 이벤트
+        createButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                const controllerLabel = this.closest('.controller').querySelector('.controller-label').innerText;
+
+                // 같은 컨트롤러 내의 다른 버튼들 선택 해제
+                const siblingButtons = this.closest('.button-grid').querySelectorAll('.create-button');
+                siblingButtons.forEach(btn => btn.classList.remove('selected'));
+
+                // 현재 버튼이 이미 선택된 상태인지 확인
+                if ((controllerLabel === '분위기' && selectedMood === value) ||
+                    (controllerLabel === '장소' && selectedPlace === value)) {
+                    // 이미 선택된 경우 선택 취소
+                    this.classList.remove('selected');
+                    if (controllerLabel === '분위기') selectedMood = '';
+                    if (controllerLabel === '장소') selectedPlace = '';
+                } else {
+                    // 새로운 선택
+                    this.classList.add('selected');
+                    if (controllerLabel === '분위기') selectedMood = value;
+                    if (controllerLabel === '장소') selectedPlace = value;
+                }
+
+                // 햅틱 피드백 (모바일)
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(50);
+                }
+            });
+        });
+
+        // 다음 단계 버튼 이벤트
+        if (nextStepBtn) {
+            nextStepBtn.addEventListener('click', function() {
+                // 선택 검증
+                if (!selectedMood) {
+                    showMessage('분위기를 선택해주세요', 'error');
+                    highlightController(document.querySelectorAll('.controller')[1]);
+                    return;
+                }
+                if (!selectedPlace) {
+                    showMessage('장소를 선택해주세요', 'error');
+                    highlightController(document.querySelectorAll('.controller')[2]);
+                    return;
+                }
+
+                // 버튼 비활성화
+                this.style.pointerEvents = 'none';
+                this.textContent = '생성 중...';
+
+                // 서버에 데이터 전송
+                fetch('/generate-music', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        speed: selectedSpeed,
+                        mood: selectedMood,
+                        location: selectedPlace
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = data.next_step;
+                    } else {
+                        showMessage(data.error || '음악 생성 중 오류가 발생했습니다', 'error');
+                        this.style.pointerEvents = 'auto';
+                        this.textContent = '다음 단계';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('서버 연결 오류가 발생했습니다', 'error');
+                    this.style.pointerEvents = 'auto';
+                    this.textContent = '다음 단계';
+                });
+            });
+        }
+
+        // 컨트롤러 강조 효과
+        function highlightController(controller) {
+            const originalTransform = controller.style.transform;
+
+            controller.style.transform = 'scale(1.1)';
+            controller.style.boxShadow = '-3px 8px 20px 3px rgba(0, 0, 0, 0.3)';
+            controller.style.zIndex = '10';
+
+            setTimeout(() => {
+                controller.style.transform = originalTransform;
+                controller.style.boxShadow = '';
+                controller.style.zIndex = '';
+            }, 1000);
+        }
+
+        // 메시지 표시 함수
+        function showMessage(message, type) {
+            const existingMessage = document.querySelector('.message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+
+            document.body.appendChild(messageDiv);
+
+            setTimeout(() => {
+                messageDiv.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                messageDiv.classList.remove('show');
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // 터치 피드백 추가 (모바일 최적화)
+        document.querySelectorAll('.create-button, .next-step-btn, .image-gen-btn, .video-gen-btn, .play-btn').forEach(element => {
+            element.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.98)';
+            }, { passive: true });
+
+            element.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 100);
+            }, { passive: true });
+        });
+
+        // 페이지 로드 애니메이션 (GitHub 기존 코드)
+        window.addEventListener('load', function() {
+            const controllers = document.querySelectorAll('.controller');
+            controllers.forEach((controller, index) => {
+                setTimeout(() => {
+                    controller.style.opacity = '0';
+                    controller.style.transform = 'translateY(20px)';
+                    controller.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+                    setTimeout(() => {
+                        controller.style.opacity = '1';
+                        controller.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>

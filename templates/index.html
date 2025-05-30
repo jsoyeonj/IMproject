@@ -1,22 +1,340 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask App</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script>
-        // 서버에서 제공한 테마 설정을 전역 변수로 설정
-        window.appTheme = {{ theme|safe }};
-    </script>
+    <title>Croffle - 하나뿐인 작업곡을 만들어보세요</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard variable', sans-serif;
+            height: 100vh;
+        }
+
+        /* GitHub 기존 스타일 그대로 */
+        .main-container {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .bg-container {
+            width: 100%;
+            height: 100vh;
+            padding: 0;
+            margin: 0;
+            vertical-align: bottom;
+            background-image: url('/static/images/bgImg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 2rem;
+        }
+
+        .main-title {
+            color: #fff;
+            font-size: 6.25rem;
+            font-style: normal;
+            font-weight: 400;
+            margin-bottom: 0.75rem;
+        }
+
+        .sub-title {
+            color: #eddfff;
+            font-size: 1.25rem;
+            font-style: normal;
+            font-weight: 500;
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .start-button, .login-button {
+            display: flex;
+            justify-content: center;
+            width: 20rem;
+            height: 4rem;
+            margin-top: 2.5rem;
+            border: none;
+            align-items: center;
+            border-radius: 1.25rem;
+            background: #fff;
+            box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .start-button:hover, .login-button:hover {
+            transform: scale(1.05);
+        }
+
+        .start-button:active, .login-button:active {
+            transform: scale(0.98);
+        }
+
+        .button-text {
+            font-size: 2rem;
+            color: #5d5d5d;
+            font-style: normal;
+            font-weight: 500;
+        }
+
+        .button-text-small {
+            font-size: 1.5rem;
+            color: #5d5d5d;
+            font-style: normal;
+            font-weight: 500;
+        }
+
+        .button-icon {
+            width: 2rem;
+            height: 2rem;
+            margin-right: 1rem;
+        }
+
+        .button-icon-small {
+            width: 2rem;
+            height: 2rem;
+            margin-right: 1rem;
+        }
+
+        /* 모바일 반응형 추가 */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                padding: 1.5rem;
+            }
+
+            .main-title {
+                font-size: 4rem;
+            }
+
+            .sub-title {
+                font-size: 1.1rem;
+                line-height: 1.4;
+            }
+
+            .start-button, .login-button {
+                width: 18rem;
+                height: 3.5rem;
+                margin-top: 2rem;
+            }
+
+            .button-text {
+                font-size: 1.6rem;
+            }
+
+            .button-text-small {
+                font-size: 1.3rem;
+            }
+
+            .button-icon, .button-icon-small {
+                width: 1.5rem;
+                height: 1.5rem;
+                margin-right: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content-wrapper {
+                padding: 1rem;
+            }
+
+            .main-title {
+                font-size: 3rem;
+            }
+
+            .sub-title {
+                font-size: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .start-button, .login-button {
+                width: 16rem;
+                height: 3rem;
+                margin-top: 1.5rem;
+            }
+
+            .button-text {
+                font-size: 1.4rem;
+            }
+
+            .button-text-small {
+                font-size: 1.1rem;
+            }
+
+            .button-icon, .button-icon-small {
+                width: 1.2rem;
+                height: 1.2rem;
+                margin-right: 0.6rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .main-title {
+                font-size: 2.5rem;
+            }
+
+            .start-button, .login-button {
+                width: 14rem;
+                height: 2.8rem;
+            }
+
+            .button-text {
+                font-size: 1.2rem;
+            }
+
+            .button-text-small {
+                font-size: 1rem;
+            }
+        }
+
+        /* 터치 최적화 */
+        .start-button, .login-button {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        /* 로딩 상태 */
+        .loading {
+            display: none;
+            margin-top: 1rem;
+            color: #eddfff;
+            font-size: 0.9rem;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <div id="root">
-        <!-- 여기에 콘텐츠가 로드됩니다 (React의 Outlet 역할) -->
-        {% block content %}
-        <div>Loading...</div>
-        {% endblock %}
+    <div class="main-container">
+        <div class="bg-container">
+            <div class="content-wrapper">
+                <h1 class="main-title">Croffle</h1>
+                <h2 class="sub-title">하나뿐인 작업곡을 만들어보세요</h2>
+
+                <a href="/create" class="start-button" id="startButton">
+                    <img src="/static/images/startImg.png" alt="play" class="button-icon">
+                    <p class="button-text">Get Started</p>
+                </a>
+
+                <a href="/login" class="login-button">
+                    <img src="/static/images/google.png" alt="Google Logo" class="button-icon-small">
+                    <p class="button-text-small">Login With Google</p>
+                </a>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    페이지를 로드하는 중...
+                </div>
+            </div>
+        </div>
     </div>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <script>
+        // Get Started 버튼 클릭 시 로딩 표시
+        document.getElementById('startButton').addEventListener('click', function(e) {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+        });
+
+        // 터치 피드백
+        const buttons = document.querySelectorAll('.start-button, .login-button');
+        buttons.forEach(button => {
+            button.addEventListener('touchstart', function() {
+                this.style.transform = 'scale(0.98)';
+            }, { passive: true });
+
+            button.addEventListener('touchend', function() {
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 100);
+            }, { passive: true });
+        });
+
+        // 페이지 로드 애니메이션
+        window.addEventListener('load', function() {
+            // 기존 GitHub 애니메이션 코드
+            const mainTitle = document.querySelector('.main-title');
+            const subTitle = document.querySelector('.sub-title');
+            const startButton = document.querySelector('.start-button');
+            const loginButton = document.querySelector('.login-button');
+
+            if (mainTitle) {
+                mainTitle.style.opacity = '0';
+                setTimeout(() => {
+                    mainTitle.style.opacity = '1';
+                    mainTitle.style.transition = 'opacity 0.8s ease';
+                }, 200);
+            }
+
+            if (subTitle) {
+                subTitle.style.opacity = '0';
+                setTimeout(() => {
+                    subTitle.style.opacity = '1';
+                    subTitle.style.transition = 'opacity 0.8s ease';
+                }, 600);
+            }
+
+            if (startButton) {
+                startButton.style.opacity = '0';
+                startButton.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    startButton.style.opacity = '1';
+                    startButton.style.transform = 'translateY(0)';
+                    startButton.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                }, 1000);
+            }
+
+            if (loginButton) {
+                loginButton.style.opacity = '0';
+                loginButton.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    loginButton.style.opacity = '1';
+                    loginButton.style.transform = 'translateY(0)';
+                    loginButton.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+                }, 1400);
+            }
+        });
+
+        // 호버 효과
+        const buttons = document.querySelectorAll('.start-button, .login-button');
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05)';
+                this.style.transition = 'transform 0.3s';
+            });
+
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    </script>
 </body>
 </html>

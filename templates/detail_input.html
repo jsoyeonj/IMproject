@@ -1,0 +1,520 @@
+{% extends "base.html" %}
+
+{% block title %}Croffle - 상세 내용 입력{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1rem 0;
+    }
+
+    .back-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: background 0.3s ease;
+    }
+
+    .back-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+    }
+
+    .progress {
+        width: 60px;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+        position: relative;
+    }
+
+    .progress::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 80%;
+        height: 100%;
+        background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+        border-radius: 3px;
+    }
+
+    .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        margin: 2rem 0;
+    }
+
+    .title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .subtitle {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 3rem;
+        line-height: 1.5;
+    }
+
+    .record-section {
+        margin: 2rem 0;
+    }
+
+    .record-container {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        margin: 0 auto;
+    }
+
+    .record {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(45deg, #2c2c2c, #1a1a1a);
+        border-radius: 50%;
+        box-shadow:
+            0 0 0 6px #333,
+            0 8px 25px rgba(0, 0, 0, 0.5);
+        position: relative;
+        transition: transform 0.3s ease;
+    }
+
+    .record.spinning {
+        animation: spin 3s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .record::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 16px;
+        height: 16px;
+        background: #ff6b6b;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .record::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 80px;
+        height: 80px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .play-btn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 107, 107, 0.9);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .play-btn:hover {
+        background: #ff6b6b;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .input-section {
+        width: 100%;
+        margin-top: 2rem;
+    }
+
+    .input-container {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        padding: 2rem;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .input-label {
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .detail-input {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 1rem;
+        font-family: inherit;
+        backdrop-filter: blur(10px);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        min-height: 50px;
+        resize: vertical;
+    }
+
+    .detail-input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .detail-input:focus {
+        outline: none;
+        border-color: #ff6b6b;
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.3);
+    }
+
+    .generate-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+        border: none;
+        border-radius: 15px;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    }
+
+    .generate-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+    }
+
+    .generate-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .examples {
+        margin-top: 1rem;
+        text-align: left;
+    }
+
+    .examples-title {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .example-item {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.8rem;
+        margin-bottom: 0.3rem;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .example-item:hover {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .example-item::before {
+        content: '• ';
+        color: #ff6b6b;
+    }
+
+    /* 반응형 */
+    @media (max-width: 480px) {
+        .container {
+            padding: 15px;
+        }
+
+        .title {
+            font-size: 2rem;
+        }
+
+        .record-container {
+            width: 150px;
+            height: 150px;
+        }
+
+        .input-container {
+            padding: 1.5rem;
+        }
+
+        .detail-input {
+            padding: 0.8rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- 헤더 -->
+    <div class="header">
+        <button class="back-btn" onclick="goBack()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+        </button>
+        <div class="logo">Croffle</div>
+        <div class="progress"></div>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+        <h1 class="title">마지막 단계!</h1>
+        <p class="subtitle">어떤 느낌의 음악을 원하시나요?<br>구체적으로 설명해주세요</p>
+
+        <!-- 레코드 -->
+        <div class="record-section">
+            <div class="record-container">
+                <div class="record" id="record"></div>
+                <button class="play-btn" id="playBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- 입력 섹션 -->
+        <div class="input-section">
+            <div class="input-container">
+                <div class="input-label">상세한 설명을 입력해주세요</div>
+
+                <textarea
+                    class="detail-input"
+                    id="detailInput"
+                    placeholder="예시: 집중할 때 듣는 잔잔하고 따뜻한 피아노 음악"
+                    rows="3"
+                ></textarea>
+
+                <button class="generate-btn" id="generateBtn">
+                    🎵 음악 생성하기
+                </button>
+
+                <!-- 예시들 -->
+                <div class="examples">
+                    <div class="examples-title">💡 이런 식으로 써보세요:</div>
+                    <div class="example-item" onclick="setExample(this)">유튜브 배경음악용 밝고 경쾌한 음악</div>
+                    <div class="example-item" onclick="setExample(this)">공부할 때 듣는 집중력 높이는 클래식</div>
+                    <div class="example-item" onclick="setExample(this)">운동할 때 신나는 일렉트로닉 비트</div>
+                    <div class="example-item" onclick="setExample(this)">카페에서 듣는 잔잔한 어쿠스틱 기타</div>
+                    <div class="example-item" onclick="setExample(this)">게임 스트리밍용 몰입감 있는 음악</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 상태 관리
+    let isPlaying = false;
+    const musicId = new URLSearchParams(window.location.search).get('music_id') || '';
+
+    // 요소들
+    const detailInput = document.getElementById('detailInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const playBtn = document.getElementById('playBtn');
+    const record = document.getElementById('record');
+
+    // 레코드 재생/일시정지
+    playBtn.addEventListener('click', function() {
+        isPlaying = !isPlaying;
+
+        if (isPlaying) {
+            record.classList.add('spinning');
+            this.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+            `;
+        } else {
+            record.classList.remove('spinning');
+            this.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+            `;
+        }
+    });
+
+    // 예시 클릭 시 입력창에 설정
+    function setExample(element) {
+        detailInput.value = element.textContent;
+        detailInput.focus();
+
+        // 햅틱 피드백
+        if ('vibrate' in navigator) {
+            navigator.vibrate(30);
+        }
+    }
+
+    // 입력 필드 엔터 키 이벤트 (Shift+Enter는 줄바꿈)
+    detailInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            generateBtn.click();
+        }
+    });
+
+    // 실시간 입력 검증
+    detailInput.addEventListener('input', function() {
+        const text = this.value.trim();
+        if (text.length > 0) {
+            generateBtn.disabled = false;
+            generateBtn.style.opacity = '1';
+        } else {
+            generateBtn.disabled = true;
+            generateBtn.style.opacity = '0.6';
+        }
+    });
+
+    // 음악 생성 버튼 클릭
+    generateBtn.addEventListener('click', function() {
+        const detailText = detailInput.value.trim();
+
+        if (!detailText) {
+            showMessage('원하는 내용을 입력해주세요', 'error');
+            detailInput.focus();
+            return;
+        }
+
+        if (detailText.length < 5) {
+            showMessage('좀 더 구체적으로 설명해주세요 (최소 5글자)', 'error');
+            detailInput.focus();
+            return;
+        }
+
+        // 로딩 상태
+        this.disabled = true;
+        this.innerHTML = '<div class="spinner"></div>음악 생성 중...';
+        this.style.opacity = '0.7';
+
+        // 입력 필드 비활성화
+        detailInput.disabled = true;
+
+        // 서버에 데이터 전송
+        fetch('/generate-music-with-detail', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                music_id: musicId,
+                detail_text: detailText
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage('음악이 생성되었습니다! 🎵', 'success');
+
+                // 레코드 회전 시작
+                record.classList.add('spinning');
+
+                setTimeout(() => {
+                    window.location.href = data.redirect_url;
+                }, 1500);
+            } else {
+                showMessage(data.error || '음악 생성 중 오류가 발생했습니다', 'error');
+                resetForm();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage('서버 연결 오류가 발생했습니다', 'error');
+            resetForm();
+        });
+    });
+
+    // 폼 상태 리셋
+    function resetForm() {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '🎵 음악 생성하기';
+        generateBtn.style.opacity = '1';
+        detailInput.disabled = false;
+        detailInput.focus();
+    }
+
+    // 뒤로가기
+    function goBack() {
+        if (history.length > 1) {
+            history.back();
+        } else {
+            window.location.href = '/create';
+        }
+    }
+
+    // 초기 상태 설정
+    document.addEventListener('DOMContentLoaded', function() {
+        detailInput.focus();
+
+        // 초기 버튼 상태
+        generateBtn.disabled = true;
+        generateBtn.style.opacity = '0.6';
+
+        // 페이지 로드 애니메이션
+        setTimeout(() => {
+            document.querySelector('.input-container').style.opacity = '0';
+            document.querySelector('.input-container').style.transform = 'translateY(20px)';
+            document.querySelector('.input-container').style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+            setTimeout(() => {
+                document.querySelector('.input-container').style.opacity = '1';
+                document.querySelector('.input-container').style.transform = 'translateY(0)';
+            }, 100);
+        }, 300);
+    });
+</script>
+{% endblock %}

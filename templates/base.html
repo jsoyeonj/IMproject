@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>{% block title %}Croffle - 모바일 음악 생성{% endblock %}</title>
+
+    <!-- Pretendard 폰트 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+
+    <!-- 공통 스타일 -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard variable', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 모바일 터치 최적화 */
+        button, a, input, select {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* 공통 버튼 스타일 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            min-height: 44px; /* 최소 터치 영역 */
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* 로딩 스피너 */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 메시지 */
+        .message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            max-width: calc(100vw - 40px);
+            text-align: center;
+        }
+
+        .message.show {
+            opacity: 1;
+        }
+
+        .message.success {
+            background: linear-gradient(45deg, #2ed573, #7bed9f);
+        }
+
+        .message.error {
+            background: linear-gradient(45deg, #ff4757, #ff6b7a);
+        }
+
+        .message.info {
+            background: linear-gradient(45deg, #3742fa, #5352ed);
+        }
+
+        /* 반응형 */
+        @media (max-width: 480px) {
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+                min-height: 40px;
+            }
+        }
+
+        /* PWA 메타 태그용 */
+        .pwa-prompt {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            z-index: 1001;
+        }
+
+        .pwa-prompt.show {
+            display: block;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 메시지 컨테이너 -->
+    <div id="message" class="message"></div>
+
+    <!-- 메인 콘텐츠 -->
+    {% block content %}{% endblock %}
+
+    <!-- PWA 설치 프롬프트 -->
+    <div id="pwa-prompt" class="pwa-prompt">
+        <p>📱 홈 화면에 Croffle을 추가하시겠습니까?</p>
+        <div style="margin-top: 12px;">
+            <button class="btn btn-primary" onclick="installPWA()">추가</button>
+            <button class="btn btn-secondary" onclick="dismissPWA()" style="margin-left: 8px;">나중에</button>
+        </div>
+    </div>
+
+    <!-- 공통 JavaScript -->
+    <script>
+        // 메시지 표시 함수
+        function showMessage(text, type = 'info', duration = 3000) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type} show`;
+
+            setTimeout(() => {
+                messageEl.classList.remove('show');
+            }, duration);
+        }
+
+        // 터치 피드백
+        function addTouchFeedback() {
+            const elements = document.querySelectorAll('button, .btn, a, input[type="submit"]');
+
+            elements.forEach(el => {
+                el.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                }, { passive: true });
+
+                el.addEventListener('touchend', function() {
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 100);
+                }, { passive: true });
+            });
+        }
+
+        // 로딩 상태 관리
+        function setLoading(element, loading = true) {
+            if (loading) {
+                element.disabled = true;
+                element.innerHTML = '<div class="spinner"></div>' + element.textContent;
+                element.style.opacity = '0.7';
+            } else {
+                element.disabled = false;
+                element.innerHTML = element.textContent.replace(/^.*?(?=\S)/, '');
+                element.style.opacity = '1';
+            }
+        }
+
+        // PWA 설치 관련
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // 설치 프롬프트 표시 (한 번만)
+            if (!localStorage.getItem('pwa-prompt-shown')) {
+                setTimeout(() => {
+                    document.getElementById('pwa-prompt').classList.add('show');
+                }, 3000);
+            }
+        });
+
+        function installPWA() {
+            const promptEl = document.getElementById('pwa-prompt');
+            promptEl.classList.remove('show');
+
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showMessage('앱이 설치되었습니다!', 'success');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+
+            localStorage.setItem('pwa-prompt-shown', 'true');
+        }
+
+        function dismissPWA() {
+            document.getElementById('pwa-prompt').classList.remove('show');
+            localStorage.setItem('pwa-prompt-shown', 'true');
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            addTouchFeedback();
+
+            // 뒤로가기 제스처 방지 (일부 브라우저)
+            window.addEventListener('popstate', function(e) {
+                // 필요한 경우 커스텀 뒤로가기 처리
+            });
+        });
+
+        // 네트워크 상태 체크
+        function checkConnection() {
+            if (!navigator.onLine) {
+                showMessage('인터넷 연결을 확인해주세요', 'error');
+                return false;
+            }
+            return true;
+        }
+
+        window.addEventListener('online', () => {
+            showMessage('인터넷에 연결되었습니다', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            showMessage('인터넷 연결이 끊어졌습니다', 'error');
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
